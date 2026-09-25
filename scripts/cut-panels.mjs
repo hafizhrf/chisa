@@ -112,7 +112,7 @@ console.log(`curtain-cut ${(fs.statSync(path.join(OUT, "curtain-cut.webp")).size
 // Sprites that can sit in front of the page's text (FrontCutouts): each also
 // baked in the dusk grade the canvas applies in the outro, so the page's copy
 // matches the canvas one there too. Same formula as spriteMaterial's dusk.
-const FRONT = ["book-purple-left", "book-red", "paper-right-b"];
+const FRONT = ["book-purple-left", "book-red", "paper-right-b", "paper-right-c"];
 for (const name of FRONT) {
   const src = path.join(ROOT, `public/sprites/${name}.png`);
   const { data, info } = await sharp(src).ensureAlpha().raw().toBuffer({ resolveWithObject: true });

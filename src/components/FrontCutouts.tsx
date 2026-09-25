@@ -2,8 +2,8 @@ import gsap from "gsap";
 import { useEffect, useRef } from "react";
 import { Stage, view } from "../gl/Stage";
 
-/** Sprites drawn in front of the hero's text, for depth: the books and the paper by the name (the curtains stay behind). */
-const FRONT = ["book-purple-left", "book-red", "paper-right-b"];
+/** Sprites drawn in front of the hero's text, for depth: the books and the papers by the name (the curtains stay behind). */
+const FRONT = ["book-purple-left", "book-red", "paper-right-b", "paper-right-c"];
 
 /**
  * Copies of a few of the room's loose things, drawn by the page itself above
