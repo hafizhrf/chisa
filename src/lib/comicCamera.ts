@@ -2,11 +2,9 @@ import { bbox, type Layout } from "./comicLayout";
 
 /**
  * The camera over the comic page, the way the MV shoots it: it holds on a
- * panel (drifting slightly), then snaps to the next one in a new direction,
- * settles, and sometimes punches in. The section is a script in "virtual
- * seconds"; the scroll gives a time t on it. Holds follow the scroll exactly;
- * snaps play at their own authored speed (see `governor`), so a quick scroll
- * still reads as a snap rather than a smear.
+ * panel (drifting slightly), then moves to the next one in a new direction,
+ * settles, and sometimes punches in. The section is a script in virtual
+ * seconds; the smoothed scroll gives the camera its time directly.
  */
 
 export interface StopDef {
@@ -140,47 +138,5 @@ export const poseAt = (stops: Stop[], segments: Segment[], tau: number, punch = 
   return { cx: lerp(from.cx, to.cx), cy: lerp(from.cy, to.cy), span: lerp(from.span, to.span), rotX: lerp(from.rotX, to.rotX), rotZ: lerp(from.rotZ, to.rotZ) };
 };
 
-/**
- * Turn the scroll's time t into the rendered time τ. Inside a hold, τ is t.
- * A move is played at real speed once the scroll has committed to it (15% in
- * the direction of travel), otherwise τ stays at its near end; stopping in the
- * middle of a move therefore always comes to rest on a hold. If the scroll has
- * run more than one move ahead, τ jumps to the start of the last one, so snaps
- * never queue up.
- */
-export const governor = (segments: Segment[], tau: number, t: number, dir: number, dt: number): number => {
-  const seg = segmentAt(segments, t);
-  let target = t;
-  if (seg.type === "move") {
-    const u = (t - seg.start) / (seg.end - seg.start);
-    target = dir >= 0 ? (u > 0.15 ? seg.end : seg.start) : u < 0.85 ? seg.start : seg.end;
-  }
-  if (Math.abs(target - tau) < 1e-6) return target;
-  const forward = target > tau;
-  const moves = segments.filter((s) => s.type === "move" && (forward ? s.end > tau && s.start < target : s.start < tau && s.end > target));
-  if (moves.length > 1) tau = forward ? moves[moves.length - 1].start : moves[0].end;
-  // Advance: through holds and the entry instantly, through moves at real time.
-  let budget = dt;
-  for (let guard = 0; guard < 8 && Math.abs(target - tau) > 1e-6; guard++) {
-    const here = segmentAt(segments, forward ? tau : Math.max(0, tau - 1e-6));
-    if (here.type !== "move") {
-      const edge = forward ? Math.min(target, here.end) : Math.max(target, here.start);
-      tau = edge;
-      if (edge === target) break;
-      if (forward && tau >= here.end) tau = here.end + 1e-7;
-      continue;
-    }
-    if (budget <= 0) break;
-    const edge = forward ? Math.min(target, here.end) : Math.max(target, here.start);
-    const step = Math.min(budget, Math.abs(edge - tau));
-    tau += forward ? step : -step;
-    budget -= step;
-  }
-  return tau;
-};
-
 /** Which of n takes shows, given progress through the panel's hold. */
 export const takeIndex = (holdP: number, n: number): number => Math.min(n - 1, Math.max(0, Math.floor(clamp01(holdP) * n)));
-
-/** Frame index at `fps`; the camera is only redrawn when it changes ("on twos" at 12). */
-export const stepIndex = (nowMs: number, fps = 12): number => Math.floor(nowMs / (1000 / fps));

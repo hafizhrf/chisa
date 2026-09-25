@@ -7,22 +7,24 @@ const FRONT = ["book-purple-left", "book-red", "paper-right-b", "paper-right-c"]
 
 /**
  * Copies of a few of the room's loose things, drawn by the page itself above
- * its text, so a book or a curtain can pass in front of a title. Each copy is
- * the very same image as the canvas sprite, placed on the box the canvas last
- * drew it in (and crossfaded to its baked dusk grade in the outro); while a
- * copy is up, the canvas leaves its own out. Transform and opacity only.
+ * its text during the opening. Each copy is the same image as the canvas
+ * sprite, placed on the box the canvas last drew it in. Outside the opening,
+ * the copies hide and the canvas draws the props behind the page again.
  */
 export function FrontCutouts() {
   const root = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const els = FRONT.map((key) => root.current!.querySelector<HTMLElement>(`[data-key="${key}"]`)!);
+    const opening = document.getElementById("opening")!;
     const tick = () => {
       const stage = Stage.current;
       if (!stage) return;
+      const openingRect = opening.getBoundingClientRect();
+      const inOpening = openingRect.bottom > 0 && openingRect.top < window.innerHeight;
       FRONT.forEach((key, i) => {
         const el = els[i];
         const st = stage.layerState(key);
-        const show = st && st.opacity > 0.001 && view.front > 0.001;
+        const show = inOpening && st && st.opacity > 0.001 && view.front > 0.001;
         if (!show || !st) {
           el.style.visibility = "hidden";
           stage.pageDrawn.delete(key);

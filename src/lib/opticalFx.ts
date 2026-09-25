@@ -8,7 +8,8 @@ import { isReduced } from "./motion";
  * cursor or stays on screen. Every layer is a
  * pre-soft gradient or a baked texture moved by transform and opacity only.
  *
- * Timings are measured from the reference (24 fps).
+ * The quick cuts follow the reference; the profile flare holds longer so it
+ * reads clearly while the character darkens against white.
  */
 export const TIMING = {
   whiteIn: 0.75,
@@ -16,8 +17,8 @@ export const TIMING = {
   warmDecay: 0.38,
   edgeIn: 0.17,
   edgeOut: 0.12,
-  ring: 0.5,
-  streak: 0.9,
+  ring: 1.2,
+  streak: 1.35,
 };
 
 export interface FxLayers {
@@ -78,10 +79,10 @@ export const ring = (x = 0.5, y = 0.45) =>
     const [a, b] = rings;
     gsap.set(rings, { left: `${x * 100}%`, top: `${y * 100}%` });
     return gsap.timeline()
-      .fromTo(a, { autoAlpha: 0.9, scale: 0.96 }, { autoAlpha: 0, scale: 1.12, duration: TIMING.ring, ease: "power2.out" }, 0)
-      .fromTo(b, { autoAlpha: 0 }, { autoAlpha: 0.7, duration: 0.06 }, 0.25 * TIMING.ring)
-      .fromTo(b, { scale: 1 }, { scale: 0.86, duration: TIMING.ring * 0.75, ease: "power2.out" }, 0.25 * TIMING.ring)
-      .to(b, { autoAlpha: 0, duration: TIMING.ring * 0.5 }, 0.5 * TIMING.ring);
+      .fromTo(a, { autoAlpha: 0, scale: 0.86 }, { autoAlpha: 0.85, scale: 1, duration: 0.25, ease: "sine.out" }, 0)
+      .to(a, { autoAlpha: 0, scale: 1.18, duration: TIMING.ring - 0.25, ease: "sine.inOut" }, 0.25)
+      .fromTo(b, { autoAlpha: 0, scale: 0.9 }, { autoAlpha: 0.6, scale: 1, duration: 0.3, ease: "sine.out" }, 0.2)
+      .to(b, { autoAlpha: 0, scale: 1.08, duration: TIMING.ring - 0.5, ease: "sine.inOut" }, 0.5);
   });
 
 /** The anamorphic streak crossing the frame at height y (viewport fraction). */

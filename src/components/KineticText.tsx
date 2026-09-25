@@ -4,7 +4,7 @@ import { useEffect, useRef, type CSSProperties } from "react";
 import { view } from "../gl/Stage";
 import { isReduced } from "../lib/motion";
 
-export type KineticVariant = "slam" | "wipe" | "rise" | "scatter";
+export type KineticVariant = "slam" | "wipe" | "rise" | "scatter" | "type";
 
 interface Props {
   text: string;
@@ -24,6 +24,8 @@ export function KineticText({ text, variant, className = "" }: Props) {
   useEffect(() => {
     const el = ref.current!;
     const chars = el.querySelectorAll<HTMLElement>(".kt-char");
+    const masks = el.querySelectorAll<HTMLElement>(".kt-mask");
+    const caret = el.querySelector<HTMLElement>(".kt-caret");
     if (isReduced()) return;
     const tl = gsap.timeline({ paused: true });
     const kick = () => { view.shake = Math.max(view.shake, 1); };
@@ -49,6 +51,17 @@ export function KineticText({ text, variant, className = "" }: Props) {
         }, { x: 0, y: 0, rotate: 0, opacity: 1, scale: 1, duration: 0.9, ease: "expo.out", stagger: 0.03 })
           .add(kick, 0.4);
         break;
+      case "type":
+        tl.set(chars, { opacity: 0 }, 0)
+          .set(caret, { opacity: 1, x: 0 }, 0);
+        chars.forEach((char, i) => {
+          const at = 0.18 + i * 0.17;
+          tl.set(char, { opacity: 1 }, at)
+            .set(caret, { x: () => masks[i].offsetLeft + masks[i].offsetWidth }, at);
+        });
+        tl.to(caret, { opacity: 0, duration: 0.12, repeat: 3, yoyo: true }, 0.18 + chars.length * 0.17)
+          .set(caret, { opacity: 0 });
+        break;
     }
     const trigger = ScrollTrigger.create({
       trigger: el,
@@ -66,6 +79,7 @@ export function KineticText({ text, variant, className = "" }: Props) {
           <span className="kt-char">{ch === " " ? " " : ch}</span>
         </span>
       ))}
+      {variant === "type" && <span className="kt-caret" aria-hidden="true" />}
     </span>
   );
 }

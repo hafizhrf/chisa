@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import type { CSSProperties } from "react";
 import type { Letter, Work } from "../content";
 import { Bubble } from "./Bubble";
 
@@ -22,21 +22,6 @@ export const stillStyle = (still: { src: string; position?: string; zoom?: numbe
   backgroundSize: still.zoom ? `${still.zoom * 100}% auto` : "cover",
 });
 
-/**
- * One colour channel of an image, for the hover's chromatic split: screening
- * with the other two primaries leaves only `keep` (the rest go white), and
- * three such layers multiplied together on white rebuild the image.
- */
-const channel = (src: string, keep: "r" | "g" | "b"): CSSProperties => {
-  const others = { r: "#0ff", g: "#f0f", b: "#ff0" }[keep];
-  return {
-    backgroundImage: `linear-gradient(${others}, ${others}), url(${src})`,
-    backgroundSize: "100% 100%, cover",
-    backgroundPosition: "center",
-    backgroundBlendMode: "screen",
-  };
-};
-
 /** Default text size of each kind, in page units (scaled by the camera like print on paper). */
 const SIZE: Record<Letter["kind"], number> = { speech: 15, thought: 14, shout: 16, box: 14, caption: 16, sfx: 30 };
 /** Kinds lettered vertically, as manga dialogue is; they size to their text instead of a width. */
@@ -47,19 +32,17 @@ const VERTICAL = new Set<Letter["kind"]>(["speech", "thought", "shout", "caption
  * pre-cut still fills the panel, lettered like a manga panel: balloons aimed at
  * the speaker, captions and sound effects placed on the picture (per layout,
  * from content.ts), and the title along its foot. The camera picks the take and when the lettering pops in. One
- * plain image normally; only while hovered is it split into colour channels.
+ * On hover the framed image zooms in slightly.
  */
 export function WorkCard({ work, onOpen, style, take = 0, revealed = true, portrait = false }: Props) {
-  const [hover, setHover] = useState(false);
   const shots = [work.panel, ...(work.variants ?? [])];
   const sequence = work.sequence ?? shots;
   const current = sequence[Math.min(take, sequence.length - 1)];
   const letters = (portrait ? work.letters?.port : work.letters?.land) ?? [];
   const tag = portrait ? "-p" : "";
-  const small = `${current}${tag}-800.webp`;
 
   return (
-    <article className={`comic__panel board ${revealed ? "is-in" : ""}`} data-panel={work.id} style={style} onPointerEnter={() => setHover(true)} onPointerLeave={() => setHover(false)}>
+    <article className={`comic__panel board ${revealed ? "is-in" : ""}`} data-panel={work.id} style={style}>
       <button type="button" className="board__hit" onClick={() => onOpen(work)} aria-label={`Open ${work.title}`} />
       <div className="board__frame">
         {/* Greyscale until the camera reaches the panel, in the take the panel opens on;
@@ -72,7 +55,7 @@ export function WorkCard({ work, onOpen, style, take = 0, revealed = true, portr
           alt=""
           aria-hidden="true"
         />
-        <div className="board__color" style={{ ["--from" as string]: letters.find((l) => l.tail)?.tail?.map((v) => `${v * 100}%`).join(" ") ?? "50% 45%" }}>
+        <div className="board__color">
         {shots.map((base, i) => (
           <img
             key={base}
@@ -87,13 +70,6 @@ export function WorkCard({ work, onOpen, style, take = 0, revealed = true, portr
           />
         ))}
         </div>
-        {hover ? (
-          <div className="board__split" aria-hidden="true">
-            <i className="board__ch board__ch--r" style={channel(small, "r")} />
-            <i className="board__ch board__ch--g" style={channel(small, "g")} />
-            <i className="board__ch board__ch--b" style={channel(small, "b")} />
-          </div>
-        ) : null}
       </div>
       {letters.map((l, i) => (
         <div

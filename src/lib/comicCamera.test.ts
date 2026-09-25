@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import page from "../comicPage.json";
 import { bbox, slantDeg, type Layout } from "./comicLayout";
-import { DRIFT, PUNCH, buildScript, deriveStops, governor, poseAt, segmentAt, stepIndex, takeIndex, type StopDef } from "./comicCamera";
+import { DRIFT, PUNCH, buildScript, deriveStops, poseAt, takeIndex, type StopDef } from "./comicCamera";
 
 const land = page.landscape as unknown as Layout;
 const port = page.portrait as unknown as Layout;
@@ -83,51 +83,11 @@ describe("comic camera", () => {
     expect(pose.rotZ).toBeLessThan(0);
   });
 
-  const run = (from: number, t: number, dir: number, seconds: number) => {
-    let tau = from;
-    for (let i = 0; i < seconds * 60; i++) tau = governor(segments, tau, t, dir, 1 / 60);
-    return tau;
-  };
-
-  it("locks to the scroll inside a hold", () => {
-    const hold = segments.find((s) => s.type === "hold" && s.stop === 2)!;
-    const t = hold.start + 0.5;
-    expect(governor(segments, hold.start + 0.1, t, 1, 1 / 60)).toBeCloseTo(t, 5);
-  });
-
-  it("comes to rest on a hold when the scroll stops mid-move", () => {
-    const move = segments.find((s) => s.type === "move" && s.stop === 2)!;
-    const tau = run(move.start, move.start + (move.end - move.start) * 0.5, 1, 1.5);
-    expect(segmentAt(segments, tau + 1e-6).type).toBe("hold");
-  });
-
-  it("plays a snap at its own speed, and only the last one of a long flick", () => {
-    const hold0 = segments.find((s) => s.type === "hold" && s.stop === 1)!;
-    const hold3 = segments.find((s) => s.type === "hold" && s.stop === 4)!;
-    const t = hold3.start + 0.2;
-    const lastMove = segments.find((s) => s.type === "move" && s.stop === 4)!;
-    // One frame in: jumped to the last move, not replaying the earlier ones.
-    const first = governor(segments, hold0.start + 0.3, t, 1, 1 / 60);
-    expect(first).toBeGreaterThanOrEqual(lastMove.start);
-    // It takes about the move's length to arrive.
-    expect(run(hold0.start + 0.3, t, 1, 0.3)).toBeLessThan(t);
-    expect(run(hold0.start + 0.3, t, 1, 1)).toBeCloseTo(t, 3);
-  });
-
-  it("plays moves backwards when scrolling back", () => {
-    const hold2 = segments.find((s) => s.type === "hold" && s.stop === 2)!;
-    const hold1 = segments.find((s) => s.type === "hold" && s.stop === 1)!;
-    expect(run(hold2.start + 0.2, hold1.end - 0.2, -1, 1)).toBeCloseTo(hold1.end - 0.2, 3);
-  });
-
-  it("picks takes across a hold and redraws the camera at 12 fps", () => {
+  it("picks takes across a hold", () => {
     expect(takeIndex(0, 3)).toBe(0);
     expect(takeIndex(0.5, 3)).toBe(1);
     expect(takeIndex(0.999, 3)).toBe(2);
     expect(takeIndex(1, 3)).toBe(2);
-    const steps = new Set<number>();
-    for (let ms = 0; ms < 1000; ms += 1000 / 60) steps.add(stepIndex(ms));
-    expect(steps.size).toBeLessThanOrEqual(13);
   });
 
   it("fits a portrait screen with moves of about half the viewport", () => {

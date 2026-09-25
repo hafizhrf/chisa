@@ -28,7 +28,8 @@ export function Intro({ ready, onReveal, onDone }: Props) {
   const [gone, setGone] = useState(false);
 
   useEffect(() => {
-    const el = root.current!;
+    const el = root.current;
+    if (!el) return; // The intro has already been dismissed during a hot reload.
     const bars = el.querySelector<HTMLElement>(".fluid")!;
     const stage = document.querySelector<HTMLElement>(".stage");
     let timeline: gsap.core.Timeline | null = null;

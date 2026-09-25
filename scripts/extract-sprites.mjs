@@ -759,4 +759,9 @@ const run = async () => {
   }
 };
 
-run().catch((error) => { console.error(error); process.exit(1); });
+run().then(async () => {
+  if (!previewOnly) {
+    const { reextractGreenSprites } = await import("./reextract-green-sprites.mjs");
+    await reextractGreenSprites();
+  }
+}).catch((error) => { console.error(error); process.exit(1); });

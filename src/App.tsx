@@ -1,7 +1,9 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "lenis";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FrontCutouts } from "./components/FrontCutouts";
+import { CharacterCutout } from "./components/CharacterCutout";
 import { Hud } from "./components/Hud";
 import { Intro } from "./components/Intro";
 import { LightLeak } from "./components/LightLeak";
@@ -21,7 +23,7 @@ gsap.registerPlugin(ScrollTrigger);
 if (import.meta.env.DEV) {
   Object.assign(window, { __flare: flare, __view: view });
   // A getter (Object.assign would copy the stage before it exists).
-  Object.defineProperty(window, "__stage", { get: () => Stage.current });
+  Object.defineProperty(window, "__stage", { configurable: true, get: () => Stage.current });
 }
 
 export default function App() {
@@ -75,6 +77,20 @@ export default function App() {
   }, [reduced]);
 
   useEffect(() => {
+    if (!introDone || reduced) return;
+    const lenis = new Lenis({ lerp: 0.12, anchors: true, prevent: (node) => !!node.closest("dialog") });
+    lenis.on("scroll", ScrollTrigger.update);
+    const tick = (time: number) => lenis.raf(time * 1000);
+    gsap.ticker.add(tick);
+    gsap.ticker.lagSmoothing(0);
+    return () => {
+      gsap.ticker.remove(tick);
+      lenis.off("scroll", ScrollTrigger.update);
+      lenis.destroy();
+    };
+  }, [introDone, reduced]);
+
+  useEffect(() => {
     document.documentElement.classList.toggle("is-locked", !introDone);
     if (!introDone) return;
     const cleanup = setupChoreography({ setActive, reduced });
@@ -95,6 +111,7 @@ export default function App() {
         <Skills />
         <Contact />
       </main>
+      <CharacterCutout />
       {/* Books the page draws over its own titles, for depth. */}
       <FrontCutouts />
       <LightLeak />

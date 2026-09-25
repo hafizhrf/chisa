@@ -102,14 +102,15 @@ a { color: inherit; }
 
 /* ── Optical FX (moment-only light, src/lib/opticalFx.ts) ────────────── */
 .ofx { position: fixed; inset: 0; z-index: 73; pointer-events: none; overflow: hidden; }
+.ofx--behind { z-index: 10; }
 .ofx > i { position: absolute; visibility: hidden; opacity: 0; will-change: transform, opacity; }
 .ofx-white { inset: 0; background: #fdfdfd; }
 .ofx-warm { inset: 0; background: linear-gradient(100deg, rgba(254, 192, 143, 0.95), rgba(244, 134, 123, 0.7) 55%, rgba(182, 100, 110, 0.25) 85%, rgba(182, 100, 110, 0)); }
 .ofx-edge { top: 0; bottom: 0; left: 0; width: 60vw; background: linear-gradient(90deg, rgba(253, 226, 218, 0.95), rgba(253, 226, 218, 0.5) 35%, rgba(253, 226, 218, 0)); }
 .ofx-ring, .ofx-streak, .contact__streak, .contact__edge { mix-blend-mode: screen; }
-.ofx-ring { width: 45vh; height: 45vh; border-radius: 50%; border: 3px solid rgba(255, 236, 140, 0.9); translate: -50% -50%; box-shadow: 0 0 18px rgba(255, 236, 140, 0.35), inset 0 0 18px rgba(255, 236, 140, 0.25); }
-.ofx-ring--thin { border-width: 1.5px; }
-.ofx-streak { left: -10vw; width: 120vw; height: 16vh; translate: 0 -50%; background: url(/fx/streak.webp) center / 100% 100% no-repeat; transform-origin: 50% 50%; }
+.ofx-ring { left: 58%; top: 42%; width: 45vh; height: 45vh; border-radius: 50%; border: 1.5px solid rgba(255, 218, 146, 0.58); translate: -50% -50%; box-shadow: 0 0 12px rgba(255, 221, 153, 0.18); }
+.ofx-ring--thin { border-width: 1px; }
+.ofx-streak { left: -10vw; top: 42%; width: 120vw; height: 16vh; translate: 0 -50%; background: url(/fx/streak.webp) center / 100% 100% no-repeat; transform-origin: 50% 50%; }
 
 /* ── Front cut-outs: books and curtains drawn over the page's titles ──── */
 .front-cutouts { position: fixed; inset: 0; z-index: 12; pointer-events: none; overflow: hidden; }
@@ -132,18 +133,7 @@ a { color: inherit; }
   padding: 16px var(--gutter);
   font-size: 0.8rem;
   letter-spacing: 0.04em;
-  isolation: isolate;
 }
-.hud__top::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 -24px;
-  z-index: -1;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
-  opacity: 0;
-  transition: opacity 0.35s;
-}
-.hud.is-scrolled .hud__top::before { opacity: 1; }
 .hud__nav { display: flex; gap: clamp(14px, 2.4vw, 32px); }
 .hud a, .hud button { pointer-events: auto; }
 .hud__nav a, .hud__motion {
@@ -151,9 +141,12 @@ a { color: inherit; }
   border: 0;
   color: inherit;
   font: inherit;
+  font-weight: 600;
   text-decoration: none;
   opacity: 0.85;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 0 2px #fff;
+  -webkit-text-stroke: 2.5px #fff;
+  paint-order: stroke fill;
+  text-shadow: 0 0 1px #fff, 0 0 3px #fff, 0 0 6px rgba(255, 255, 255, 0.9);
   cursor: pointer;
   transition: opacity 0.2s, background-size 0.3s;
   background: linear-gradient(currentColor, currentColor) 0 100% / 0% 1px no-repeat;
@@ -181,9 +174,9 @@ a { color: inherit; }
     radial-gradient(60% 50% at 12% 100%, rgba(245, 214, 227, 0.45), transparent 70%);
   pointer-events: none;
 }
-.hero__title { position: relative; }
 .hero .st-char { transform-box: fill-box; transform-origin: 50% 60%; }
-.hero__title { position: relative; max-width: min(1400px, 100%); }
+.hero__title { position: relative; width: min(1400px, 100%); justify-self: center; }
+.hero__title > .stroke-text svg { margin-inline: auto; }
 .hero__sub { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; margin-top: 14px; }
 .hero__sub .stroke-text { width: auto; }
 .hero__role {
@@ -231,7 +224,7 @@ a { color: inherit; }
 /* ── Profile: one pinned shot ────────────────────────────────────────── */
 .about {
   position: relative;
-  height: 290svh;
+  height: 380svh;
   /* Starts under the opening's last screen, so its pin takes over on the very
      frame the opening's lets go: no stretch of still picture in between. */
   margin-top: -100svh;
@@ -240,16 +233,28 @@ a { color: inherit; }
 .about__flat {
   position: absolute;
   inset: 0;
-  /* Over the bars as well: the white silhouette needs the whole field blue. */
+  /* An uninterrupted white field behind the darkened character. */
   z-index: 1;
   opacity: 0;
-  background: radial-gradient(70% 60% at 50% 48%, #8fd3f5, #45b3e6 70%, #33a4db);
+  background: #fff;
 }
-.about__pop { position: fixed; z-index: 11; top: 0; left: 0; visibility: hidden; will-change: transform, opacity; transform-origin: center; }
-.about__pop img { position: absolute; inset: 0; width: 100%; height: 100%; }
-/* The white cut-out, with a soft drop shadow as on an MV title card. */
-/* The white cut-out, with a soft drop shadow as on an MV title card. */
-.about__pop-silhouette { opacity: 0; filter: brightness(0) invert(1) drop-shadow(14px 16px 0 rgba(40, 90, 130, 0.28)); }
+.character-cutout { position: fixed; z-index: 9; top: 0; left: 0; visibility: hidden; pointer-events: none; will-change: transform, opacity; transform-origin: center; }
+.character-cutout img { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* Keep the illustration's internal detail visible in the backlit profile beat. */
+.character-cutout__shadow { opacity: 0; filter: brightness(0.31) saturate(0.68) contrast(1.1) drop-shadow(10px 14px 7px rgba(60, 52, 60, 0.18)); }
+/* The light is clipped by the source PNG's alpha, so the white field stays white. */
+.character-cutout__flare {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse 46% 52% at 80% 42%, rgba(255, 115, 62, 0.94), transparent 82%),
+    radial-gradient(ellipse 47% 59% at 55% 55%, rgba(255, 216, 86, 0.8), transparent 82%),
+    radial-gradient(ellipse 46% 60% at 25% 57%, rgba(137, 170, 91, 0.84), transparent 83%);
+  -webkit-mask: url('/sprites/character.png') center / 100% 100% no-repeat;
+  mask: url('/sprites/character.png') center / 100% 100% no-repeat;
+  mix-blend-mode: screen;
+}
 .about__top, .about__bottom { max-width: 640px; visibility: hidden; }
 /* Set on the diagonal, the text runs out of the white into the picture band;
    a thick white outline keeps it readable over the illustration. (On an inner
@@ -291,9 +296,9 @@ a { color: inherit; }
   left: 0;
   transform-origin: 0 0;
   background: #fff;
-  will-change: transform;
   --pan: 0%;
 }
+.comic.is-active .comic-page { will-change: transform; }
 .comic__cell { position: absolute; overflow: hidden; background: #fff; }
 /* Screentone, printed once: a fixed dot pattern, no animation. */
 .comic__cell.has-tone::after {
@@ -308,6 +313,10 @@ a { color: inherit; }
 }
 .comic__panel--title { position: absolute; display: flex; flex-direction: column; justify-content: flex-end; padding: 4% 5%; }
 .comic__hint { margin: 0; font-size: 0.86rem; opacity: 0.7; }
+.comic-page--portrait .comic__panel--title .section-title__meta { font-size: 2rem; }
+.comic-page--portrait .comic__panel--title .section-title { margin-bottom: 20px; }
+.comic-page--portrait .comic__panel--title { padding-bottom: calc(var(--u) * 55); }
+.comic-page--portrait .comic__hint { font-size: 1.8rem; line-height: 1.3; }
 .comic-page__borders { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
 .comic-page__borders polygon { fill: none; stroke: #5f5d6b; stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 /* In the desk beat one panel's picture pans inside its frame, like parallax through a window. */
@@ -320,19 +329,15 @@ a { color: inherit; }
 
 .board__hit { position: absolute; inset: 0; z-index: 4; background: none; border: 0; cursor: pointer; }
 .board__frame { position: absolute; inset: 0; background: #fff; overflow: hidden; }
-/* Colour flowing into a panel: the colour layer is revealed through a soft
-   radial mask that grows from the subject, over the greyscale print. */
-@property --color-in { syntax: "<number>"; inherits: true; initial-value: 0; }
+/* A cheap colour fade over the greyscale print as the camera reaches a panel. */
 .board__gray { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .board__color {
   position: absolute;
   inset: 0;
-  --color-in: 0;
-  -webkit-mask: radial-gradient(circle at var(--from, 50% 45%), #000 calc(var(--color-in) * 150% - 25%), transparent calc(var(--color-in) * 150%));
-  mask: radial-gradient(circle at var(--from, 50% 45%), #000 calc(var(--color-in) * 150% - 25%), transparent calc(var(--color-in) * 150%));
-  transition: --color-in 1.6s cubic-bezier(0.3, 0.6, 0.2, 1);
+  opacity: 0;
+  transition: opacity 0.65s ease-out;
 }
-.board.is-in .board__color { --color-in: 1; }
+.board.is-in .board__color { opacity: 1; }
 .board__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.9s ease-in-out; }
 /* The base take is always under the others, so a crossfade never shows white. */
 .board__img:first-child, .board__img.is-shown { opacity: 1; }
@@ -340,30 +345,27 @@ a { color: inherit; }
 /* Scale the whole frame (greyscale and colour together), never one layer, so they always line up. */
 .board:hover .board__frame { scale: 1.05; }
 .comic-page [data-panel="lilac"].board:hover .board__frame { scale: 1.12; }
-/* Hover only: the image as three colour channels, pulled apart and jittering. */
-.board__split { position: absolute; inset: 0; background: #fff; isolation: isolate; }
-.board__ch { position: absolute; inset: -8px; mix-blend-mode: multiply; scale: 1.05; animation: jitter 0.24s steps(2) infinite; }
-.board__ch--r { transform: translate(-6px, 1px); }
-.board__ch--b { transform: translate(6px, -1px); }
-@keyframes jitter { 50% { translate: 1px -1px; } }
 /* Caption: the work's title, lettered small along the panel's foot. */
 .board__caption {
   position: absolute;
   z-index: 3;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: -1px;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 2px 12px;
   margin: 0;
-  padding: 26px 14px 10px;
+  padding: 26px 14px 1px;
+  line-height: 1;
   background: linear-gradient(to top, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.8) 60%, rgba(255, 255, 255, 0));
   pointer-events: none;
 }
-.board__title { font-family: var(--font-display); font-size: clamp(0.95rem, 1.25vw, 1.25rem); line-height: 1.3; }
+.board__title { font-family: var(--font-display); font-size: clamp(0.95rem, 1.25vw, 1.25rem); line-height: 1; }
 .board__meta { font-size: 0.75rem; opacity: 0.72; }
+/* The sky panel leans inward at its foot; keep the caption past that edge. */
+.comic-page--landscape [data-panel="sky"] .board__caption { left: 19%; }
 
 /* Lettering, placed per panel on the picture (content.ts) and sized in page
    units (--u), so it zooms with the page like print on paper. */
@@ -424,7 +426,13 @@ a { color: inherit; }
   overflow: auto;
   box-shadow: 0 40px 120px -40px rgba(67, 51, 99, 0.45);
 }
-.modal::backdrop { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(8px); }
+.modal::backdrop {
+  background: rgba(255, 255, 255, 0);
+  backdrop-filter: blur(0);
+  transition: background-color 0.42s ease, backdrop-filter 0.42s ease;
+}
+.modal.is-visible::backdrop { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(8px); }
+html.reduce-motion .modal::backdrop { transition: none; }
 .modal__inner { position: relative; display: grid; grid-template-columns: 1.7fr 1fr; }
 .modal__screen { position: relative; aspect-ratio: 16 / 9; background: #fff; overflow: hidden; }
 .modal__screen video, .modal__still { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background-repeat: no-repeat; }
@@ -470,6 +478,10 @@ a { color: inherit; }
 .kt-mask { display: inline-block; }
 .kt--rise .kt-mask { overflow: hidden; padding-bottom: 0.06em; }
 .kt-char { display: inline-block; will-change: transform; }
+.kt--type { position: relative; }
+.kt-caret { position: absolute; left: 0; top: 0.08em; width: 0.035em; height: 0.78em; background: var(--ink); opacity: 0; pointer-events: none; }
+html:not(.reduce-motion) .kt--type .kt-char { opacity: 0; }
+html.reduce-motion .kt--type .kt-char { opacity: 1; }
 .marquee { margin-top: clamp(40px, 8vh, 80px); display: grid; gap: 10px; rotate: -2deg; }
 .marquee__track { display: flex; width: max-content; font-family: var(--font-display); font-size: clamp(1.2rem, 2.6vw, 2rem); animation: marquee 40s linear infinite; }
 .marquee__track span { display: inline-flex; align-items: center; gap: 22px; padding-right: 22px; white-space: nowrap; }
@@ -488,8 +500,7 @@ a { color: inherit; }
 .contact__edge { top: 0; bottom: 0; left: 0; width: 60vw; background: linear-gradient(90deg, rgba(253, 226, 218, 0.95), rgba(253, 226, 218, 0.5) 35%, rgba(253, 226, 218, 0)); }
 .contact__streak { left: -10%; top: 70%; width: 120%; height: 16vh; translate: 0 -50%; background: url(/fx/streak.webp) center / 100% 100% no-repeat; }
 
-/* The outro title, set simply: a bold sans in cobalt, slanted, in two staggered
-   lines across the dusk shot (the girl stands in the gap). Letters rise out of
+/* The outro title is slanted across three staggered lines. Letters rise out of
    their baselines one after another. */
 .contact-title {
   position: absolute;
@@ -509,6 +520,7 @@ a { color: inherit; }
 .contact-title__line { position: absolute; display: flex; white-space: nowrap; transform: skewX(-11deg); }
 .contact-title__line--1 { left: 3%; top: 21%; }
 .contact-title__line--2 { left: 52%; top: 45%; }
+.contact-title__line--3 { left: 4%; top: 68%; }
 .contact-title__mask { display: inline-block; overflow: hidden; padding: 0.06em 0.02em 0.1em; margin: -0.06em -0.02em -0.1em; }
 .contact-title__char { display: inline-block; translate: 0 110%; transition: translate 0.7s cubic-bezier(0.2, 0.9, 0.2, 1); }
 .contact-title.is-in .contact-title__char { translate: 0 0; }
@@ -516,6 +528,7 @@ a { color: inherit; }
   .contact-title { font-size: 12.5vw; }
   .contact-title__line--1 { left: 5%; top: 18%; }
   .contact-title__line--2 { left: auto; right: 5%; top: 30%; }
+  .contact-title__line--3 { left: 5%; top: 42%; }
 }
 /* Bloom over the room as the white parts: a baked glow of its highlights, screened. */
 .contact__bloom { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0; mix-blend-mode: screen; overflow: hidden; }

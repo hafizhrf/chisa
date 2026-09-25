@@ -7,8 +7,9 @@ describe("optical fx timing (from the reference, 24 fps)", () => {
     expect(TIMING.warmDecay).toBeCloseTo(0.38);
   });
 
-  it("edge leak is a flicker, and the ring flare is gone in half a second", () => {
+  it("edge leak is a flicker, while the profile flare remains visible through the silhouette beat", () => {
     expect(TIMING.edgeIn + TIMING.edgeOut).toBeLessThan(0.35);
-    expect(TIMING.ring).toBeLessThanOrEqual(0.5);
+    expect(TIMING.ring).toBeGreaterThanOrEqual(1);
+    expect(TIMING.ring).toBeLessThanOrEqual(1.5);
   });
 });

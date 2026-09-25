@@ -62,10 +62,10 @@ export const content = {
 
   about: {
     heading: "プロフィール",
-    lead: "Aku membuat motion graphics, ilustrasi, dan web interaktif yang terasa seperti potongan MV: cahaya, ritme, dan tipografi yang bergerak.",
+    lead: "Aku memadukan motion design, ilustrasi, creative coding, dan AI untuk membangun pengalaman visual yang hidup.",
     body: [
-      "Placeholder bio: ceritakan singkat latar belakangmu, gaya visual yang kamu kejar, dan jenis proyek yang paling kamu suka kerjakan.",
-      "Tulis juga dengan siapa kamu pernah bekerja, atau apa yang sedang kamu pelajari sekarang.",
+      "Aku mengeksplorasi prompting dan machine learning untuk ideasi serta prototipe. Website ini masih draft; bio dan karya akan diperbarui.",
+      "Aku tertarik pada cara teknologi dan cerita visual bertemu: dari eksperimen awal hingga pengalaman interaktif yang terasa personal.",
     ],
     stats: [
       { label: "Years", value: "05" },
@@ -78,7 +78,30 @@ export const content = {
   works: [
     {
       id: "lilac",
-      letters: {"land": [{"kind": "speech", "text": "…ライラック、咲いてた。", "x": 0.21, "y": 0.19, "w": 0.34, "tail": [0.47, 0.46]}, {"kind": "sfx", "text": "ザアッ", "x": 0.78, "y": 0.15, "rot": 10}], "port": [{"kind": "speech", "text": "…ライラック、咲いてた。", "x": 0.82, "y": 0.42, "w": 0.3, "tail": [0.56, 0.47]}, {"kind": "sfx", "text": "ザアッ", "x": 0.2, "y": 0.2, "rot": -8}]},
+      letters: {
+        land: [
+          {
+            kind: "speech",
+            text: "…ライラック、咲いてた。",
+            x: 0.21,
+            y: 0.19,
+            w: 0.34,
+            tail: [0.47, 0.46],
+          },
+          { kind: "sfx", text: "ザアッ", x: 0.78, y: 0.15, rot: 10 },
+        ],
+        port: [
+          {
+            kind: "speech",
+            text: "…ライラック、咲いてた。",
+            x: 0.82,
+            y: 0.42,
+            w: 0.3,
+            tail: [0.56, 0.47],
+          },
+          { kind: "sfx", text: "ザアッ", x: 0.2, y: 0.2, rot: -8 },
+        ],
+      },
       title: "Lilac, Lyric Video",
       jp: "ライラック",
       line: "青い春が、まだ続いてる。",
@@ -102,7 +125,40 @@ export const content = {
     },
     {
       id: "afterschool",
-      letters: {"land": [{"kind": "thought", "text": "もう少しだけ、ここにいたい。", "x": 0.67, "y": 0.38, "w": 0.26, "tail": [0.46, 0.36], "size": 1.3}, {"kind": "box", "text": "描きかけの放課後", "x": 0.13, "y": 0.2, "w": 0.18, "size": 1.2}, {"kind": "sfx", "text": "カサッ", "x": 0.9, "y": 0.72, "rot": 6}], "port": [{"kind": "thought", "text": "もう少しだけ、ここにいたい。", "x": 0.78, "y": 0.3, "w": 0.34, "tail": [0.48, 0.42]}, {"kind": "caption", "text": "描きかけの放課後", "x": 0.08, "y": 0.4}, {"kind": "sfx", "text": "カサッ", "x": 0.3, "y": 0.22, "rot": 6}]},
+      letters: {
+        land: [
+          {
+            kind: "thought",
+            text: "もう少しだけ、ここにいたい。",
+            x: 0.67,
+            y: 0.38,
+            w: 0.26,
+            tail: [0.46, 0.36],
+            size: 1.3,
+          },
+          {
+            kind: "box",
+            text: "描きかけの放課後",
+            x: 0.13,
+            y: 0.2,
+            w: 0.18,
+            size: 1.2,
+          },
+          { kind: "sfx", text: "カサッ", x: 0.9, y: 0.72, rot: 6 },
+        ],
+        port: [
+          {
+            kind: "thought",
+            text: "もう少しだけ、ここにいたい。",
+            x: 0.78,
+            y: 0.3,
+            w: 0.34,
+            tail: [0.48, 0.42],
+          },
+          { kind: "caption", text: "描きかけの放課後", x: 0.08, y: 0.4 },
+          { kind: "sfx", text: "カサッ", x: 0.3, y: 0.22, rot: 6 },
+        ],
+      },
       title: "After School Reel",
       jp: "放課後",
       line: "もう少しだけ、ここにいたい。",
@@ -119,7 +175,22 @@ export const content = {
     },
     {
       id: "curtain",
-      letters: {"land": [{"kind": "sfx", "text": "バサッ", "x": 0.74, "y": 0.72, "rot": 12, "size": 0.62}], "port": [{"kind": "sfx", "text": "バサッ", "x": 0.7, "y": 0.3, "rot": 10, "size": 1.2}, {"kind": "shout", "text": "幕が、上がる！", "x": 0.26, "y": 0.42, "w": 0.3}]},
+      letters: {
+        land: [
+          {
+            kind: "sfx",
+            text: "バサッ",
+            x: 0.74,
+            y: 0.72,
+            rot: 12,
+            size: 0.62,
+          },
+        ],
+        port: [
+          { kind: "sfx", text: "バサッ", x: 0.7, y: 0.3, rot: 10, size: 1.2 },
+          { kind: "shout", text: "幕が、上がる！", x: 0.26, y: 0.42, w: 0.3 },
+        ],
+      },
       title: "Curtain Call Title Sequence",
       jp: "カーテンコール",
       line: "幕が、上がる！",
@@ -140,7 +211,32 @@ export const content = {
     },
     {
       id: "desk",
-      letters: {"land": [{"kind": "caption", "text": "光をすくって", "x": 0.06, "y": 0.5}, {"kind": "speech", "text": "…見えた？", "x": 0.3, "y": 0.28, "w": 0.14, "tail": [0.46, 0.44]}, {"kind": "sfx", "text": "キラッ", "x": 0.55, "y": 0.22, "rot": -6}], "port": [{"kind": "speech", "text": "…見えた？", "x": 0.82, "y": 0.4, "w": 0.22, "tail": [0.56, 0.6]}, {"kind": "sfx", "text": "キラッ", "x": 0.68, "y": 0.28, "rot": -6}, {"kind": "caption", "text": "光をすくって", "x": 0.08, "y": 0.4}]},
+      letters: {
+        land: [
+          { kind: "caption", text: "光をすくって", x: 0.06, y: 0.5 },
+          {
+            kind: "speech",
+            text: "…見えた？",
+            x: 0.3,
+            y: 0.28,
+            w: 0.14,
+            tail: [0.46, 0.44],
+          },
+          { kind: "sfx", text: "キラッ", x: 0.55, y: 0.22, rot: -6 },
+        ],
+        port: [
+          {
+            kind: "speech",
+            text: "…見えた？",
+            x: 0.82,
+            y: 0.4,
+            w: 0.22,
+            tail: [0.56, 0.6],
+          },
+          { kind: "sfx", text: "キラッ", x: 0.68, y: 0.28, rot: -6 },
+          { kind: "caption", text: "光をすくって", x: 0.08, y: 0.4 },
+        ],
+      },
       title: "Reflections (Short Film)",
       jp: "反射",
       line: "…見えた？",
@@ -161,7 +257,24 @@ export const content = {
     },
     {
       id: "sky",
-      letters: {"land": [{"kind": "caption", "text": "青に溶けていく", "x": 0.9, "y": 0.5, "size": 0.8}, {"kind": "sfx", "text": "ふわっ", "x": 0.55, "y": 0.3, "rot": 6}, {"kind": "box", "text": "空、きれい。", "x": 0.36, "y": 0.64, "w": 0.26}], "port": [{"kind": "caption", "text": "青に溶けていく", "x": 0.92, "y": 0.5}, {"kind": "sfx", "text": "ふわっ", "x": 0.64, "y": 0.3, "rot": 6}, {"kind": "box", "text": "空、きれい。", "x": 0.25, "y": 0.45, "w": 0.3}]},
+      letters: {
+        land: [
+          {
+            kind: "caption",
+            text: "青に溶けていく",
+            x: 0.9,
+            y: 0.5,
+            size: 0.8,
+          },
+          { kind: "sfx", text: "ふわっ", x: 0.55, y: 0.3, rot: 6 },
+          { kind: "box", text: "空、きれい。", x: 0.36, y: 0.64, w: 0.26 },
+        ],
+        port: [
+          { kind: "caption", text: "青に溶けていく", x: 0.92, y: 0.5 },
+          { kind: "sfx", text: "ふわっ", x: 0.64, y: 0.3, rot: 6 },
+          { kind: "box", text: "空、きれい。", x: 0.25, y: 0.45, w: 0.3 },
+        ],
+      },
       title: "Blue Hour Visualizer",
       jp: "ブルーアワー",
       line: "空、きれい。",
@@ -182,7 +295,28 @@ export const content = {
     },
     {
       id: "pages",
-      letters: {"land": [{"kind": "box", "text": "めくれて、飛んでいく。", "x": 0.24, "y": 0.15, "w": 0.36}, {"kind": "sfx", "text": "パラパラ", "x": 0.62, "y": 0.56, "rot": -8}], "port": [{"kind": "sfx", "text": "パラパラ", "x": 0.7, "y": 0.55, "rot": -8}, {"kind": "box", "text": "めくれて、飛んでいく。", "x": 0.26, "y": 0.2, "w": 0.36}]},
+      letters: {
+        land: [
+          {
+            kind: "box",
+            text: "めくれて、飛んでいく。",
+            x: 0.24,
+            y: 0.15,
+            w: 0.36,
+          },
+          { kind: "sfx", text: "パラパラ", x: 0.62, y: 0.56, rot: -8 },
+        ],
+        port: [
+          { kind: "sfx", text: "パラパラ", x: 0.7, y: 0.55, rot: -8 },
+          {
+            kind: "box",
+            text: "めくれて、飛んでいく。",
+            x: 0.26,
+            y: 0.34,
+            w: 0.36,
+          },
+        ],
+      },
       title: "Loose Pages Key Visual",
       jp: "ページ",
       line: "めくれて、飛んでいく。",
@@ -227,7 +361,7 @@ export const content = {
       word: "CODE",
       jp: "コード",
       note: "React · Three.js · GLSL · GSAP",
-      variant: "scatter",
+      variant: "type",
     },
   ] as const,
 
@@ -256,14 +390,13 @@ export const content = {
     { label: "GitHub", href: "https://github.com/" },
   ],
 
-  credits:
-    "Ilustrasi: placeholder (AI-generated). Ganti dengan karya sendiri sebelum dipublikasikan.",
+  credits: "Website draft, Bantu hapis komis artist beneran",
 };
 
 export const SECTIONS = [
   { id: "opening", label: "Opening", jp: "オープニング" },
   { id: "profile", label: "Profile", jp: "プロフィール" },
   { id: "works", label: "Works", jp: "ワークス" },
-  { id: "arsenal", label: "Arsenal", jp: "スキル" },
+  { id: "arsenal", label: "Skills", jp: "スキル" },
   { id: "contact", label: "Contact", jp: "コンタクト" },
 ] as const;

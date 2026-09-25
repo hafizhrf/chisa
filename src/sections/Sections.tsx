@@ -59,44 +59,25 @@ export function Hero({ revealed }: { revealed: boolean }) {
 /**
  * The profile is one long pinned shot (choreography.ts runs it): the camera
  * dollies into the girl while white bars squeeze the frame; she breaks out
- * over the bars, turns into a white silhouette on flat sky blue, and the cut
+ * over the bars, darkens against white in a warm flare, and the cut
  * lands on the top-down desk, framed in a band between the bars, where the
  * profile text sits. Then the bars close to white.
  *
- * She is drawn here in the DOM, lined up with where the canvas would draw her,
- * because to break out of the frame she has to sit above the white bars.
+ * The shared CharacterCutout rises above the bars during this pinned shot.
  */
 export function About() {
   const [play, setPlay] = useState(false);
   const ref = useRef<HTMLElement>(null);
-  const pop = useRef<HTMLDivElement>(null);
   const flat = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const trigger = ScrollTrigger.create({
       trigger: ref.current,
-      // The profile timeline's 0.58 (it runs over the pinned 190svh), when the band opens on the desk.
       start: "top+=38% top",
       onEnter: () => setPlay(true),
     });
-    const el = pop.current!;
-    const photo = el.querySelector<HTMLElement>("img")!;
-    const silhouette = el.querySelector<HTMLElement>(".about__pop-silhouette")!;
     const tick = () => {
       flat.current!.style.opacity = String(view.flat);
-      const rect = view.popout > 0.001 ? Stage.current?.screenRect("character") : null;
-      if (!rect) {
-        el.style.visibility = "hidden";
-        return;
-      }
-      el.style.visibility = "visible";
-      el.style.width = `${rect.w}px`;
-      el.style.height = `${rect.h}px`;
-      el.style.transform = `translate3d(${rect.cx - rect.w / 2}px, ${rect.cy - rect.h / 2}px, 0) rotate(${rect.rot}rad)`;
-      el.style.opacity = String(view.popout);
-      silhouette.style.opacity = String(view.silhouette);
-      // A graphic silhouette, not a faded photo: the photo goes as it comes.
-      photo.style.opacity = String(1 - view.silhouette);
     };
     gsap.ticker.add(tick);
     return () => { trigger.kill(); gsap.ticker.remove(tick); };
@@ -128,11 +109,6 @@ export function About() {
             </div>
           }
         />
-        <div ref={pop} className="about__pop" aria-hidden="true">
-          {/* The very same file the canvas draws, so the hand-over on the pin is invisible. */}
-          <img src="/sprites/character.png" alt="" />
-          <img className="about__pop-silhouette" src="/sprites/character.png" alt="" />
-        </div>
       </div>
     </section>
   );
@@ -222,9 +198,9 @@ export function Contact() {
           <i className="contact__bloom-glow" />
           <i className="contact__bloom-wash" />
         </div>
-        {/* The title, set simply across the shot in two staggered lines; she stands in the gap. */}
-        <h2 className={`contact-title ${play ? "is-in" : ""}`} aria-label="Let's make something!">
-          {["LET'S MAKE", "SOMETHING!"].map((line, l) => (
+        {/* The invitation lands in three staggered lines around the character. */}
+        <h2 className={`contact-title ${play ? "is-in" : ""}`} aria-label="Let's make something together!">
+          {["LET'S MAKE", "SOMETHING", "TOGETHER!"].map((line, l) => (
             <span key={line} className={`contact-title__line contact-title__line--${l + 1}`} aria-hidden="true">
               {[...line].map((ch, i) => (
                 <span key={i} className="contact-title__mask">

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="月">
+  <rect width="64" height="64" rx="14" fill="#b6d6f2"/>
+  <path d="M19 12H47V49Q47 53 43 53H38M19 12V30Q19 44 12 52M19 25H47M18 38H47" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" transform="translate(2 2)"/>
+  <path d="M19 12H47V49Q47 53 43 53H38M19 12V30Q19 44 12 52M19 25H47M18 38H47" fill="none" stroke="#3f9be8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

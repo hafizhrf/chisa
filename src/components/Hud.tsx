@@ -3,25 +3,16 @@ import { SECTIONS } from "../content";
 import { isReduced, onMotionChange, setReduced } from "../lib/motion";
 
 /**
- * Plain text navigation over the page: the cut list and a motion switch,
- * nothing else. A frosted band fades in behind it once the page scrolls, so
- * content can pass underneath cleanly.
+ * Plain text navigation over the page. Keep the background transparent so
+ * the profile character and its flare remain visible at the top edge.
  */
 export function Hud({ active, hidden = false }: { active: number; hidden?: boolean }) {
   const [reduced, setReducedState] = useState(isReduced());
-  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => onMotionChange(setReducedState), []);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
-    <div className={`hud ${scrolled && active !== 1 ? "is-scrolled" : ""} ${hidden ? "is-hidden" : ""}`}>
+    <div className={`hud ${hidden ? "is-hidden" : ""}`}>
       <header className="hud__top">
         <nav className="hud__nav" aria-label="Sections">
           {SECTIONS.map((s, i) => (

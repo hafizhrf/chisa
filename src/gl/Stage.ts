@@ -53,7 +53,7 @@ export const view = {
   parallax: 1,
   /** Brief camera kick, decays by itself (kinetic accents). */
   shake: 0,
-  /** 0..1: the girl is drawn by the DOM above the page (she breaks out of the frame) instead of in the canvas. */
+  /** 0..1: the shared DOM character rises above the profile's white bars. */
   popout: 0,
   /** 0..1 over the opening's scroll: the room drifts upward, nearer layers faster. */
   lift: 0,
@@ -63,9 +63,10 @@ export const view = {
   charLight: 1,
   /** 0..1: the page's own copies of the front cut-outs (FrontCutouts) are shown; 0 hands them back to the canvas (the dusk shot). */
   front: 1,
-  /** DOM-only beats of the profile cut: the flat blue field and the white silhouette. */
+  /** DOM-only beats of the profile cut: the white field and dark character. */
   flat: 0,
-  silhouette: 0,
+  shadow: 0,
+  flare: 0,
 };
 
 /** On-screen box of a layer, CSS px, from the last drawn frame. */
@@ -135,6 +136,19 @@ const smooth = (t: number) => {
   return x * x * (3 - 2 * x);
 };
 
+// The source art is a wide frame. A portrait cover crop otherwise leaves most
+// loose objects outside the viewport, so arrange those sprites around its edges.
+const MOBILE_PROPS: Record<string, { x: number; y: number; scale: number }> = {
+  "book-open-top": { x: 0.8, y: 0.69, scale: 0.78 },
+  "book-purple-left": { x: -0.98, y: 0.38, scale: 0.68 },
+  "book-purple-right": { x: 0.9, y: 0.07, scale: 0.82 },
+  "book-red": { x: 0.91, y: -0.85, scale: 0.78 },
+  "paper-mid": { x: 0.77, y: 0.42, scale: 0.78 },
+  "paper-right-a": { x: -0.86, y: 0, scale: 0.82 },
+  "paper-right-b": { x: -0.93, y: -0.18, scale: 0.88 },
+  "paper-right-c": { x: -1.22, y: -0.9, scale: 0.7 },
+};
+
 const loadImage = (src: string) =>
   new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image();
@@ -194,6 +208,7 @@ class SceneModel {
     if (!reduced) this.time += dt;
     const t = this.time;
     const { w: hw, h: hh } = this.half;
+    const portraitMix = smooth((0.82 - hw / hh) / 0.22);
     const handheld = reduced ? 0 : view.handheld;
     const para = reduced ? 0 : view.parallax;
 
@@ -214,9 +229,9 @@ class SceneModel {
     // with the camera; the room behind lags, the props in front rush past.
     const zd = (depth: number) => 1 + (zoom - 1) * (0.55 + depth);
     // A frame point p (world, y up) lands at (p - focus) * zoom + parallax.
-    const place = (x: number, y: number, depth: number) => ({
-      x: (x - fx) * zd(depth) - pointer.x * 34 * depth * para,
-      y: (y - fy) * zd(depth) + pointer.y * 22 * depth * para,
+    const place = (x: number, y: number, depth: number, mouse = true) => ({
+      x: (x - fx) * zd(depth) - (mouse ? pointer.x * 34 * depth * para : 0),
+      y: (y - fy) * zd(depth) + (mouse ? pointer.y * 22 * depth * para : 0),
     });
 
     const items: Item[] = [];
@@ -244,11 +259,16 @@ class SceneModel {
     for (const layer of this.layers) {
       const { info, kind, seed, home } = layer;
       const floatAmt = reduced ? 0 : info.float;
-      const hero = place(home.x, home.y, info.depth);
+      const mobile = MOBILE_PROPS[layer.key];
+      const mix = mobile ? portraitMix : 0;
+      const homeX = mobile ? home.x + (mobile.x * hw - home.x) * mix : home.x;
+      const homeY = mobile ? home.y + (mobile.y * hh - home.y) * mix : home.y;
+      const hero = place(homeX, homeY, info.depth, kind !== "character");
       let x = hero.x + Math.sin(t * 0.55 + seed * 2) * 5 * floatAmt;
       let y = hero.y + Math.sin(t * 0.8 + seed) * 9 * floatAmt;
-      let sx = info.w * zd(info.depth);
-      let sy = info.h * zd(info.depth);
+      const mobileScale = 1 + ((mobile?.scale ?? 1) - 1) * mix;
+      let sx = info.w * zd(info.depth) * mobileScale;
+      let sy = info.h * zd(info.depth) * mobileScale;
       let rot = Math.sin(t * 0.6 + seed) * 0.035 * floatAmt;
       if (kind === "prop" || kind === "ribbon") {
         // As the opening scrolls, the loose things are thrown past the camera:
@@ -267,14 +287,20 @@ class SceneModel {
       } else if (kind === "curtain") {
         // The curtains part as the camera goes through them.
         x += (home.x < 0 ? -1 : 1) * view.lift * hw * 0.35;
+        // Keep the inner silhouette in place while extending the fabric past
+        // the screen edge, including at the pointer's furthest position.
+        const outer = home.x < 0 ? -1 : 1;
+        const bleed = 96 * zd(info.depth);
+        x += outer * bleed / 2;
+        sx += bleed;
       }
       let opacity = 1;
       const flip = 1;
 
       if (kind === "character") {
-        // The plate under her has been painted out, so in a crossfade she
-        // arrives ahead of it rather than showing the smudge through herself.
-        opacity = Math.min(view.character, smooth(view.scene * 1.8)) * (1 - view.popout);
+        // One DOM image draws her through the opening and profile, avoiding a
+        // visible renderer swap at the pin. The canvas takes over in contact.
+        opacity = Math.min(view.character, smooth(view.scene * 1.8)) * (1 - view.front);
       } else if (kind === "curtain") {
         sx *= 1 + Math.sin(t * 0.7 + seed) * 0.012 * floatAmt;
         opacity = view.curtains;
