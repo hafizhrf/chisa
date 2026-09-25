@@ -375,6 +375,10 @@
     {
       "name": "desk-topdown",
       "file": "Gemini_Generated_Image_q5r4kyq5r4kyq5r4.jpeg"
+    },
+    {
+      "name": "desk-sleep",
+      "file": "sleep.jpeg"
     }
   ],
   "skipSprites": [

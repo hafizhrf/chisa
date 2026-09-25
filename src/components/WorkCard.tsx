@@ -70,8 +70,11 @@ export function WorkCard({ work, index, onOpen, style }: Props) {
     io.observe(el);
     const tick = () => {
       if (!visible) return;
+      // Where the panel's centre is across the screen, from 90% (just in) to
+      // 35% (well past the middle): every take plays while the panel is in full view.
       const r = el.getBoundingClientRect();
-      const travelled = (window.innerWidth - r.left) / (window.innerWidth + r.width);
+      const centre = (r.left + r.width / 2) / window.innerWidth;
+      const travelled = (0.9 - centre) / (0.9 - 0.35);
       const at = Math.min(sequence.length - 1, Math.max(0, Math.floor(travelled * sequence.length)));
       setStep((s) => (s === at ? s : at));
     };

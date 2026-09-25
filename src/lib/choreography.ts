@@ -100,6 +100,8 @@ export const setupChoreography = ({ setActive, reduced }: { setActive: (index: n
       .set(view, { desk: 1 }, 0.45)
       .to(view, { flat: 0, duration: 0.05 }, 0.46)
       .fromTo(view, { deskZoom: 1.3 }, { deskZoom: 1.6, duration: 0.54, ease: "power1.out" }, 0.46)
+      // While the profile text is read, her eyes slowly close.
+      .fromTo(view, { deskSleep: 0 }, { deskSleep: 1, duration: 0.08, ease: "power1.inOut", immediateRender: false }, 0.62)
       .fromTo(bars, { "--bar": 0.3 }, { "--bar": 0.26, duration: 0.08, ease: "power2.out", immediateRender: false }, 0.46)
       // Close to white, well before the pin lets go, so a fast scroll (the
       // scrub trails it) never lets the section leave with the frame still open.

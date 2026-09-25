@@ -37,6 +37,8 @@ export const view = {
   deskFocusX: 0.45,
   deskFocusY: 0.3,
   deskAtX: 0.68,
+  /** 0..1: the desk shot's eyes-closed take, faded over the plate as the profile scrolls. */
+  deskSleep: 0,
   deskAtY: 0.5,
   character: 1,
   curtains: 1,
@@ -139,6 +141,7 @@ const loadImage = (src: string) =>
 class SceneModel {
   scene?: HTMLImageElement;
   desk?: HTMLImageElement;
+  deskSleep?: HTMLImageElement;
   layers: Layer[] = [];
   time = 0;
   half = { w: 1, h: 1 };
@@ -171,6 +174,7 @@ class SceneModel {
     this.scene = scene;
     // The desk plate isn't needed until the second section.
     loadImage(plate("desk-topdown")).then((image) => { this.desk = image; }).catch(() => undefined);
+    loadImage(plate("desk-sleep")).then((image) => { this.deskSleep = image; }).catch(() => undefined);
   }
 
   resize(w: number, h: number) {
@@ -224,7 +228,10 @@ class SceneModel {
       const slackX = Math.max(0, pw / 2 - hw), slackY = Math.max(0, ph / 2 - hh);
       dx = Math.max(-slackX, Math.min(slackX, dx));
       dy = Math.max(-slackY, Math.min(slackY, dy));
-      items.push({ key: "plate:desk", kind: "plate", image: this.desk, x: dx - pointer.x * 20 * para, y: dy + pointer.y * 14 * para, sx: pw, sy: ph, rot: 0, opacity: view.desk, flip: 1 });
+      const deskItem: Item = { key: "plate:desk", kind: "plate", image: this.desk, x: dx - pointer.x * 20 * para, y: dy + pointer.y * 14 * para, sx: pw, sy: ph, rot: 0, opacity: view.desk, flip: 1 };
+      items.push(deskItem);
+      // The same shot with her eyes closed, registered to it, faded in on top.
+      if (this.deskSleep) items.push({ ...deskItem, key: "plate:desk-sleep", image: this.deskSleep, opacity: view.desk * view.deskSleep });
     }
 
     for (const layer of this.layers) {
