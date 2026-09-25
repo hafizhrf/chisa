@@ -1,6 +1,6 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { playLeak } from "../components/LightLeak";
+import { cut, ring } from "./opticalFx";
 import { SECTIONS } from "../content";
 import { view } from "../gl/Stage";
 
@@ -39,7 +39,10 @@ export const setupChoreography = ({ setActive, reduced }: { setActive: (index: n
       defaults: { ease: "none" },
       scrollTrigger: { trigger: "#opening", start: "top top", end: "bottom bottom", scrub: reduced ? true : 0.6 },
     })
-      .fromTo(view, { zoom: 1, lift: 0 }, { zoom: reduced ? 1 : 1.22, lift: reduced ? 0 : 1, duration: 1, ease: "power1.in", immediateRender: false }, 0);
+      .fromTo(view, { zoom: 1, lift: 0 }, { zoom: reduced ? 1 : 1.22, lift: reduced ? 0 : 1, duration: 1, ease: "power1.in", immediateRender: false }, 0)
+      // The lens fringe clears before the profile pin, where the canvas hands the
+      // girl over to the page's own copy of her: they must match exactly there.
+      .fromTo(view, { ca: 0.18, charLight: 1 }, { ca: 0, charLight: 0, duration: 0.8, immediateRender: false }, 0);
     const opening = gsap.timeline({
       defaults: { ease: "none" },
       scrollTrigger: { trigger: "#opening", start: "top top", end: "bottom bottom", scrub: true },
@@ -75,7 +78,9 @@ export const setupChoreography = ({ setActive, reduced }: { setActive: (index: n
           const past = self.progress > 0.455;
           if (past !== cutDone) {
             cutDone = past;
-            playLeak({ sweep: 1.1, flash: 0.7 });
+            // A hard cut into a warm leak, with a ring flare catching the lens.
+            cut();
+            if (past) ring(0.62, 0.4);
           }
         },
       },
@@ -117,9 +122,9 @@ export const setupChoreography = ({ setActive, reduced }: { setActive: (index: n
       defaults: { ease: "none" },
       scrollTrigger: { trigger: "#contact", start: "top bottom", end: "bottom bottom", scrub: reduced ? true : 0.6 },
     })
-      .fromTo(view, { scene: 0, character: 0, curtains: 0, props: 0 }, { scene: 1, character: 1, curtains: 1, props: 1, duration: 0.01, immediateRender: false }, 0)
-      .fromTo(view, { zoom: reduced ? 1 : 1.45, focusX: 10, focusY: -30, lift: reduced ? 0 : 1, dusk: 0 },
-        { zoom: 1, focusX: 0, focusY: 0, lift: 0, dusk: 1, duration: 1, ease: "power2.out", immediateRender: false }, 0);
+      .fromTo(view, { scene: 0, character: 0, curtains: 0, props: 0, charLight: 0 }, { scene: 1, character: 1, curtains: 1, props: 1, charLight: 1, duration: 0.01, immediateRender: false }, 0)
+      .fromTo(view, { zoom: reduced ? 1 : 1.45, focusX: 10, focusY: -30, lift: reduced ? 0 : 1, dusk: 0, ca: 0.18 },
+        { zoom: 1, focusX: 0, focusY: 0, lift: 0, dusk: 1, ca: 0.5, duration: 1, ease: "power2.out", immediateRender: false }, 0);
 
     // The profile text, locked straight to the scroll (see the opening).
     gsap.timeline({
@@ -141,32 +146,48 @@ export const setupChoreography = ({ setActive, reduced }: { setActive: (index: n
     };
     gsap.ticker.add(syncPopout);
 
-    // Works: the comic page slides past while the section is pinned. The
-    // section is made exactly as tall as the page is wide, so vertical scroll
-    // maps one-to-one onto the pan; the window shadow drifts slower.
-    const works = document.querySelector<HTMLElement>("#works")!;
-    const page = document.querySelector<HTMLElement>(".comic")!;
-    const distance = () => Math.max(0, page.scrollWidth - window.innerWidth);
-    // Pan distance, plus a stretch at the start for the page to fade up in place.
-    const fadeIn = () => window.innerHeight * 0.45;
-    const sizeWorks = () => { works.style.height = `${distance() + fadeIn() + window.innerHeight}px`; };
-    sizeWorks();
-    ScrollTrigger.addEventListener("refreshInit", sizeWorks);
+    // The white bars part on the dusk room once the contact shot is pinned; as
+    // they open, light leaks in off the left edge and a streak crosses the room.
+    let leaked = false;
     gsap.timeline({
-      defaults: { ease: "none" },
-      scrollTrigger: { trigger: works, start: "top top", end: "bottom bottom", scrub: reduced ? true : 0.5, invalidateOnRefresh: true },
+      scrollTrigger: {
+        trigger: "#contact",
+        start: "top top",
+        end: "top -40%",
+        scrub: reduced ? true : 0.5,
+        onUpdate: (self) => {
+          const open = self.progress > 0.35;
+          if (open && !leaked && self.direction > 0 && !reduced) {
+            gsap.timeline()
+              .fromTo(".contact__edge", { autoAlpha: 0, xPercent: -18 }, { autoAlpha: 1, xPercent: 0, duration: 0.17, ease: "power2.out" }, 0)
+              .to(".contact__edge", { autoAlpha: 0, duration: 0.12, ease: "power1.in" })
+              .fromTo(".contact__streak", { autoAlpha: 0, scaleX: 0.3, xPercent: -8 }, { autoAlpha: 0.9, scaleX: 1.05, xPercent: 0, duration: 0.32, ease: "power2.out" }, 0)
+              .to(".contact__streak", { autoAlpha: 0, scaleX: 1.4, xPercent: 6, duration: 0.6, ease: "power1.in" }, 0.32);
+          }
+          leaked = open;
+        },
+      },
     })
-      .fromTo(".works__sticky", { autoAlpha: 0, scale: 0.94 }, { autoAlpha: 1, scale: 1, duration: 0.14, ease: "power2.out" }, 0)
-      .fromTo(page, { x: 0 }, { x: () => -distance(), duration: 0.86 }, 0.14)
-      .fromTo(".comic__shadow-frame", { xPercent: 2, scale: 1 }, { xPercent: -4, scale: 1.04, duration: 1 }, 0);
-
-    // The white bars part on the dusk room once the contact shot is pinned.
-    gsap.timeline({ scrollTrigger: { trigger: "#contact", start: "top top", end: "top -40%", scrub: reduced ? true : 0.5 } })
-      .fromTo(".fluid--contact", { "--bar": 0.5 }, { "--bar": 0, ease: "power2.inOut", immediateRender: false });
+      .fromTo(".fluid--contact", { "--bar": 0.5 }, { "--bar": 0, ease: "power2.inOut", immediateRender: false }, 0)
+      // Bloom: the room's light blooms as the frame opens, peaks, and settles to a soft glow.
+      .fromTo(".contact__bloom", { opacity: 0 }, { opacity: 1, duration: 0.45, ease: "power2.in", immediateRender: false }, 0.2)
+      .to(".contact__bloom", { opacity: reduced ? 0 : 0.4, duration: 0.35, ease: "power2.out" }, 0.65)
+      .fromTo(".contact__bloom-wash", { opacity: 0 }, { keyframes: { opacity: [0, 0.75, 0] }, duration: 0.6, ease: "none", immediateRender: false }, 0.3);
 
     // As the form sheet rises over the dusk shot, the title panels step back out of its way.
     gsap.timeline({ scrollTrigger: { trigger: ".contact__sheet", start: "top bottom", end: "top 45%", scrub: true } })
-      .to(".manga", { autoAlpha: 0, y: -50, ease: "power1.in" });
+      .to(".contact-title", { autoAlpha: 0, y: -50, ease: "power1.in" }, 0)
+      .to(".contact__bloom", { opacity: 0, ease: "power1.in" }, 0);
+
+    // The front copies are for the opening only: in the dusk shot the canvas
+    // draws every prop itself, under the bloom and the bars. The switch happens
+    // while the room is still hidden, so it never shows.
+    ScrollTrigger.create({
+      trigger: "#contact",
+      start: "top bottom",
+      onEnter: () => { view.front = 0; },
+      onLeaveBack: () => { view.front = 1; },
+    });
 
     SECTIONS.forEach((section, index) => {
       ScrollTrigger.create({
@@ -178,8 +199,6 @@ export const setupChoreography = ({ setActive, reduced }: { setActive: (index: n
     });
     return () => {
       gsap.ticker.remove(syncPopout);
-      ScrollTrigger.removeEventListener("refreshInit", sizeWorks);
-      works.style.height = "";
     };
   });
   return () => ctx.revert();

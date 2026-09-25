@@ -88,6 +88,10 @@ const GLYPHS: Record<string, Glyph> = {
   " ": { adv: 46, strokes: [] },
 
   "ー": { adv: 100, strokes: [[[6, 50], [94, 50]]] },
+  "く": { adv: 78, strokes: [{ s: [[66, 4], [40, 30], [22, 50], [40, 70], [68, 96]] }] },
+  "こ": { adv: 96, strokes: [{ s: [[22, 22], [52, 18], [78, 22], [68, 34]] }, { s: [[14, 70], [26, 86], [58, 92], [88, 84]] }] },
+  "ろ": { adv: 96, strokes: [{ s: [[22, 12], [72, 10], [28, 56], [58, 44], [86, 56], [86, 82], [62, 96], [34, 90]] }] },
+  "ね": { adv: 102, strokes: [[[30, 2], [30, 98]], { s: [[6, 32], [44, 26], [22, 64], [8, 94], [44, 52], [74, 44], [88, 62], [84, 88], [62, 96], [52, 84], [66, 74], [96, 92]] }] },
   "ト": { adv: 86, strokes: [[[34, 0], [34, 100]], [[38, 40], [84, 64]]] },
   "フ": fu,
   "オ": o,
@@ -116,7 +120,7 @@ const GLYPHS: Record<string, Glyph> = {
   "デ": { adv: 100, strokes: [[[16, 4], [80, 4]], [[4, 34], [94, 34]], { s: [[52, 36], [50, 70], [28, 100]] }, [[84, 0], [88, 14]], [[96, 0], [100, 12]]] },
 };
 
-export const hasGlyph = (ch: string) => ch.toUpperCase() in GLYPHS;
+export const hasGlyph = (ch: string) => ch === "\n" || ch.toUpperCase() in GLYPHS || ch in GLYPHS;
 
 /** Straight segments, each corner rounded by a quadratic bend. */
 const cornerPath = (pts: Pt[], radius = 9): string => {

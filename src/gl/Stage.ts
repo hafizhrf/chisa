@@ -57,6 +57,12 @@ export const view = {
   popout: 0,
   /** 0..1 over the opening's scroll: the room drifts upward, nearer layers faster. */
   lift: 0,
+  /** Chromatic aberration (0 none, 1 the intro's strongest); a faint trace stays at rest. */
+  ca: 0.18,
+  /** How much of the flare's light falls on the girl (the page's copy of her takes none). */
+  charLight: 1,
+  /** 0..1: the page's own copies of the front cut-outs (FrontCutouts) are shown; 0 hands them back to the canvas (the dusk shot). */
+  front: 1,
   /** DOM-only beats of the profile cut: the flat blue field and the white silhouette. */
   flat: 0,
   silhouette: 0,
@@ -117,6 +123,7 @@ interface Frame {
   dusk: number;
   time: number;
   reduced: boolean;
+  ca: number;
   items: Item[];
 }
 
@@ -286,7 +293,7 @@ class SceneModel {
       radius: Math.min(hw, hh) * 0.95,
       strength: flare.intensity * (flare.sweeping ? 0.4 + flare.sweepFade * 0.9 : 1),
     };
-    return { cam, half: this.half, light, dusk: view.dusk, time: t, reduced, items };
+    return { cam, half: this.half, light, dusk: view.dusk, time: t, reduced, ca: reduced ? 0 : view.ca, items };
   }
 }
 
@@ -361,9 +368,13 @@ class GLBackend implements Backend {
       u.uRotation.value = item.rot;
       u.uOpacity.value = item.opacity;
       u.uFlip.value = item.flip;
+      u.uCam.value.set(cam.x, cam.y);
+      u.uHalf.value.set(half.w, half.h);
+      u.uSize.value.set(item.sx, item.sy);
+      u.uCA.value = frame.ca;
       u.uLight.value.set(light.x, light.y);
       u.uLightRadius.value = light.radius;
-      u.uLight1.value = light.strength;
+      u.uLight1.value = light.strength * (item.kind === "character" ? view.charLight : 1);
       u.uGradeMix.value = frame.dusk;
     });
 
@@ -520,6 +531,16 @@ export class Stage {
 
   tick(dt: number) {
     this.last = this.model.frame(dt);
+    if (this.pageDrawn.size) {
+      // Draw the frame without the layers the page shows in front of its text.
+      const frame = this.last;
+      const items = frame.items.map((i) => (this.pageDrawn.has(i.key) ? { ...i, opacity: 0 } : i));
+      const anything = items.some((i) => i.opacity > 0.001);
+      if (!anything && this.idle) return;
+      this.idle = !anything;
+      this.backend.draw({ ...frame, items });
+      return;
+    }
     // Behind the white pages nothing of the room shows: draw one empty frame, then stop until it does.
     const anything = this.last.items.some((i) => i.opacity > 0.001);
     if (!anything && this.idle) return;
@@ -541,6 +562,17 @@ export class Stage {
       h: item.sy * unit,
       rot: -item.rot,
     };
+  }
+
+  /** Layers the page is drawing itself (in front of its text); the canvas leaves them out. */
+  readonly pageDrawn = new Set<string>();
+
+  /** A layer's on-screen box, opacity and the dusk grade on it, from the last frame. */
+  layerState(key: string): { rect: ScreenRect; opacity: number; dusk: number } | null {
+    const item = this.last?.items.find((i) => i.key === key);
+    const rect = this.screenRect(key);
+    if (!item || !rect || !this.last) return null;
+    return { rect, opacity: item.opacity, dusk: this.last.dusk };
   }
 
   static current: Stage | null = null;

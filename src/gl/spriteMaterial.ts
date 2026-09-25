@@ -32,14 +32,24 @@ const fragment = /* glsl */ `
   uniform vec3 uGrade;        // colour grade multiplier (dusk)
   uniform float uGradeMix;
   uniform float uFlip;        // paper flutter: 1 front, -1 back (darker)
+  uniform vec2 uCam;          // camera centre and half-extent (world), for radial effects
+  uniform vec2 uHalf;
+  uniform vec2 uSize;         // this layer's size on screen, world units
+  uniform float uCA;          // chromatic aberration amount
   varying vec2 vUv;
   varying vec2 vWorld;
 
   void main() {
+    // Chromatic aberration: red and blue pulled apart along the line from the
+    // screen's centre, growing toward the edges, as a lens does. uCA = 0 is exact.
+    vec2 fromCentre = (vWorld - uCam) / uHalf;
+    vec2 off = fromCentre * uCA * 7.0 / uSize;
     vec4 tex = texture2D(map, vUv);
-    float a = tex.a;
+    vec4 texR = texture2D(map, vUv - off);
+    vec4 texB = texture2D(map, vUv + off);
+    float a = max(tex.a, max(texR.a, texB.a));
     if (a < 0.002) discard;
-    vec3 col = tex.rgb;
+    vec3 col = vec3(texR.r * texR.a, tex.g * tex.a, texB.b * texB.a) / max(a, 1e-3);
 
     vec2 toLight = uLight - vWorld;
     float dist = length(toLight);
@@ -97,6 +107,10 @@ export const createSpriteMaterial = (texture: THREE.Texture, opts: { rim?: numbe
       uGrade: { value: new THREE.Color(1, 0.8, 0.68) },
       uGradeMix: { value: 0 },
       uFlip: { value: 1 },
+      uCam: { value: new THREE.Vector2() },
+      uHalf: { value: new THREE.Vector2(1, 1) },
+      uSize: { value: new THREE.Vector2(1, 1) },
+      uCA: { value: 0 },
     },
   });
 

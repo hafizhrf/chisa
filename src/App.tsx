@@ -1,9 +1,11 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { FrontCutouts } from "./components/FrontCutouts";
 import { Hud } from "./components/Hud";
 import { Intro } from "./components/Intro";
 import { LightLeak } from "./components/LightLeak";
+import { OpticalFx } from "./components/OpticalFx";
 import { WorkModal } from "./components/WorkModal";
 import type { Work } from "./content";
 import { Stage, view } from "./gl/Stage";
@@ -16,7 +18,11 @@ import { About, Contact, Hero, Skills, Works } from "./sections/Sections";
 gsap.registerPlugin(ScrollTrigger);
 
 // Handle for poking at the light from the console / automated checks in development.
-if (import.meta.env.DEV) Object.assign(window, { __flare: flare, __view: view });
+if (import.meta.env.DEV) {
+  Object.assign(window, { __flare: flare, __view: view });
+  // A getter (Object.assign would copy the stage before it exists).
+  Object.defineProperty(window, "__stage", { get: () => Stage.current });
+}
 
 export default function App() {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -89,7 +95,10 @@ export default function App() {
         <Skills />
         <Contact />
       </main>
+      {/* Books the page draws over its own titles, for depth. */}
+      <FrontCutouts />
       <LightLeak />
+      <OpticalFx />
       <Hud active={active} hidden={!revealed} />
       {stage || introFallback ? <Intro ready={stage?.ready ?? Promise.resolve()} onReveal={onReveal} onDone={onDone} /> : null}
       <WorkModal work={work} onClose={() => setWork(null)} />

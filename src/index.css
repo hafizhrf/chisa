@@ -8,6 +8,8 @@
   --font-display: "Zen Antique Soft", "Yuji Boku", serif;
   --font-body: "Zen Kaku Gothic New", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  /* Handwriting (a pencil hand with Latin and Japanese) for the personal notes. */
+  --font-hand: "Klee One", "Zen Kaku Gothic New", cursive;
 }
 
 :root {
@@ -19,7 +21,7 @@
   --ink: #3f9be8;
   --rose: #ee7aa8;
   /* The white everything opens from and closes into. */
-  --paper: #fdfcff;
+  --paper: #ffffff;
   --line: rgba(67, 51, 99, 0.16);
   --gutter: clamp(16px, 4vw, 56px);
   color-scheme: light;
@@ -35,12 +37,8 @@ body {
   font-family: var(--font-body);
   font-weight: 500;
   line-height: 1.7;
-  /* White pages, with the faintest sky and lilac at the edges. */
-  background:
-    radial-gradient(90% 60% at 100% 0%, rgba(182, 214, 242, 0.22), transparent 60%),
-    radial-gradient(80% 60% at 0% 100%, rgba(245, 214, 227, 0.28), transparent 60%),
-    var(--paper);
-  background-attachment: fixed;
+  /* One white everywhere, so every white section meets the next without a seam. */
+  background: var(--paper);
   overflow-x: hidden;
 }
 
@@ -57,7 +55,11 @@ a { color: inherit; }
 /* ── Brush lettering ─────────────────────────────────────────────────── */
 .stroke-text { display: block; margin: 0; line-height: 0; }
 .stroke-text svg { display: block; overflow: visible; }
+.ink-text { line-height: 1.05; font-family: var(--font-display); font-weight: 400; }
+.ink-text__line { display: inline-block; transform: skewX(-10deg); }
+.ink-char { display: inline-block; clip-path: inset(0 0 100% 0); text-shadow: 0.06em 0.05em 0 var(--ink-shadow, #fff); }
 .st-ink, .st-shadow { stroke-dasharray: 1 1; stroke-dashoffset: 1; opacity: 0; }
+.st-fringe { mix-blend-mode: multiply; opacity: 0.55; }
 
 /* ── Fluid white bars (the frame squeezing and opening) ──────────────── */
 .fluid { --bar: 0; --wave-on: 0; position: absolute; inset: 0; pointer-events: none; }
@@ -98,6 +100,23 @@ a { color: inherit; }
 }
 .leak-flash { inset: 0; background: radial-gradient(ellipse at 55% 45%, #fff 0%, rgba(255, 250, 246, 0.9) 50%, rgba(248, 240, 252, 0.7) 100%); }
 
+/* ── Optical FX (moment-only light, src/lib/opticalFx.ts) ────────────── */
+.ofx { position: fixed; inset: 0; z-index: 73; pointer-events: none; overflow: hidden; }
+.ofx > i { position: absolute; visibility: hidden; opacity: 0; will-change: transform, opacity; }
+.ofx-white { inset: 0; background: #fdfdfd; }
+.ofx-warm { inset: 0; background: linear-gradient(100deg, rgba(254, 192, 143, 0.95), rgba(244, 134, 123, 0.7) 55%, rgba(182, 100, 110, 0.25) 85%, rgba(182, 100, 110, 0)); }
+.ofx-edge { top: 0; bottom: 0; left: 0; width: 60vw; background: linear-gradient(90deg, rgba(253, 226, 218, 0.95), rgba(253, 226, 218, 0.5) 35%, rgba(253, 226, 218, 0)); }
+.ofx-ring, .ofx-streak, .contact__streak, .contact__edge { mix-blend-mode: screen; }
+.ofx-ring { width: 45vh; height: 45vh; border-radius: 50%; border: 3px solid rgba(255, 236, 140, 0.9); translate: -50% -50%; box-shadow: 0 0 18px rgba(255, 236, 140, 0.35), inset 0 0 18px rgba(255, 236, 140, 0.25); }
+.ofx-ring--thin { border-width: 1.5px; }
+.ofx-streak { left: -10vw; width: 120vw; height: 16vh; translate: 0 -50%; background: url(/fx/streak.webp) center / 100% 100% no-repeat; transform-origin: 50% 50%; }
+
+/* ── Front cut-outs: books and curtains drawn over the page's titles ──── */
+.front-cutouts { position: fixed; inset: 0; z-index: 12; pointer-events: none; overflow: hidden; }
+.front-cutouts__item { position: absolute; top: 0; left: 0; visibility: hidden; transform-origin: center; will-change: transform, opacity; }
+.front-cutouts__item img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.front-cutouts__item img:last-child { opacity: 0; }
+
 /* ── Intro ───────────────────────────────────────────────────────────── */
 .intro { position: fixed; inset: 0; z-index: 70; cursor: pointer; }
 
@@ -120,7 +139,7 @@ a { color: inherit; }
   position: absolute;
   inset: 0 0 -24px;
   z-index: -1;
-  background: linear-gradient(to bottom, rgba(253, 252, 255, 0.9), rgba(253, 252, 255, 0));
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
   opacity: 0;
   transition: opacity 0.35s;
 }
@@ -158,7 +177,7 @@ a { color: inherit; }
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(to top, rgba(253, 252, 255, 0.72), rgba(253, 252, 255, 0.28) 32%, rgba(253, 252, 255, 0) 58%),
+    linear-gradient(to top, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.28) 32%, rgba(255, 255, 255, 0) 58%),
     radial-gradient(60% 50% at 12% 100%, rgba(245, 214, 227, 0.45), transparent 70%);
   pointer-events: none;
 }
@@ -171,7 +190,9 @@ a { color: inherit; }
   display: grid;
   gap: 2px;
   margin: 0;
-  font-size: 0.86rem;
+  font-family: var(--font-hand);
+  font-weight: 600;
+  font-size: 1.02rem;
   line-height: 1.5;
   text-shadow: 0 0 14px #fff, 0 0 6px #fff, 0 0 2px #fff;
   opacity: 0;
@@ -227,78 +248,98 @@ a { color: inherit; }
 .about__pop { position: fixed; z-index: 11; top: 0; left: 0; visibility: hidden; will-change: transform, opacity; transform-origin: center; }
 .about__pop img { position: absolute; inset: 0; width: 100%; height: 100%; }
 /* The white cut-out, with a soft drop shadow as on an MV title card. */
+/* The white cut-out, with a soft drop shadow as on an MV title card. */
 .about__pop-silhouette { opacity: 0; filter: brightness(0) invert(1) drop-shadow(14px 16px 0 rgba(40, 90, 130, 0.28)); }
 .about__top, .about__bottom { max-width: 640px; visibility: hidden; }
-.about__eyebrow { margin: 0 0 4px; font-size: 0.82rem; letter-spacing: 0.06em; }
-.about__lead { margin: 0 0 8px; font-family: var(--font-display); font-size: clamp(1.05rem, 1.7vw, 1.35rem); line-height: 1.65; }
-.about__body { margin: 0 0 10px; font-size: 0.92rem; opacity: 0.82; }
-.about__facts { margin: 0; font-size: 0.82rem; letter-spacing: 0.02em; color: var(--ink); }
+/* Set on the diagonal, the text runs out of the white into the picture band;
+   a thick white outline keeps it readable over the illustration. (On an inner
+   wrapper, since GSAP owns the outer element's transform for the fade.) */
+.about__tilt { rotate: -5deg; transform-origin: 0 50%; }
+.about__top .about__tilt { translate: 0 34px; }
+.about__bottom .about__tilt { translate: 0 -30px; }
+.about__lead, .about__body, .about__facts, .about__eyebrow {
+  /* A smooth white halo: stacked soft shadows follow every curve of the letters. */
+  text-shadow:
+    0 0 1px #fff, 0 0 2px #fff, 0 0 3px #fff, 0 0 4px #fff,
+    0 0 5px #fff, 0 0 6px #fff, 0 0 8px #fff, 0 0 10px #fff;
+}
+.about__tilt { font-family: var(--font-hand); font-weight: 600; }
+.about__eyebrow { margin: 0 0 4px; font-size: 0.95rem; letter-spacing: 0.04em; }
+.about__lead { margin: 0 0 8px; font-size: clamp(1.1rem, 1.8vw, 1.45rem); line-height: 1.6; }
+.about__body { margin: 0 0 10px; font-size: 1rem; opacity: 0.86; }
+.about__facts { margin: 0; font-size: 0.95rem; letter-spacing: 0.02em; color: var(--ink); }
 @media (max-width: 720px) {
   .about__body { display: none; }
   .fluid__content--top { bottom: 10px; }
   .fluid__content--bottom { top: 14px; }
 }
 
-/* ── Works: one giant comic page, panned by the scroll ───────────────── */
+/* ── Works: one comic page shot by a camera ───────────────────────────── */
 .works {
   position: relative;
-  /* No box of its own: it begins under the profile's last screen, so its pin
-     takes over the moment the profile's lets go and the comic fades up in
-     place on the page's white, instead of a white block sliding in. */
+  /* Begins under the profile's last screen, so its pin takes over the moment
+     the profile's lets go (the comic starts white, as the profile ends). */
   margin-top: -100svh;
 }
-.works__sticky { position: sticky; top: 0; height: 100svh; overflow: hidden; display: flex; align-items: center; }
-.comic {
-  display: grid;
-  grid-template-columns: repeat(16, minmax(0, 1fr));
-  grid-template-rows: repeat(6, minmax(0, 1fr));
-  gap: clamp(8px, 1vw, 14px);
-  flex: none;
-  width: max(270vw, 2600px);
-  height: calc(100svh - clamp(110px, 16vh, 170px));
-  margin-top: 36px;
-  padding: 0 var(--gutter);
+.works__sticky { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+.comic { position: absolute; inset: 0; background: #fff; }
+.comic__camera { position: absolute; inset: 0; perspective: 1200px; overflow: hidden; }
+/* The page: laid out once, moved only by one transform the camera writes on twos. */
+.comic-page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  background: #fff;
   will-change: transform;
+  --pan: 0%;
 }
-.comic__panel { position: relative; overflow: hidden; background: #fff; border: 2px solid rgba(67, 51, 99, 0.85); }
-.comic__panel--title { display: flex; flex-direction: column; justify-content: flex-end; padding: clamp(16px, 2vw, 28px); border: 0; background: none; }
+.comic__cell { position: absolute; overflow: hidden; background: #fff; }
+/* Screentone, printed once: a fixed dot pattern, no animation. */
+.comic__cell.has-tone::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(rgba(60, 64, 90, 0.2) 1px, transparent 1.4px) 0 0 / 7px 7px;
+  -webkit-mask: linear-gradient(115deg, #000 0%, transparent 55%);
+  mask: linear-gradient(115deg, #000 0%, transparent 55%);
+}
+.comic__panel--title { position: absolute; display: flex; flex-direction: column; justify-content: flex-end; padding: 4% 5%; }
 .comic__hint { margin: 0; font-size: 0.86rem; opacity: 0.7; }
-/* Light from the classroom window lying across the page: a pre-blurred image
-   of the frame's shadow in perspective (no live blur), a curtain's shadow
-   swaying at one side, the light slowly breathing as clouds pass. It hardly
-   moves with the pan, because the window doesn't. */
-.comic__shadow { position: absolute; inset: 0; pointer-events: none; animation: light-breathe 9s ease-in-out infinite; }
-.comic__shadow-frame {
-  position: absolute;
-  left: -20%;
-  top: -30%;
-  width: 140%;
-  height: 160%;
-  background: url(/works/window-light.webp) center / 100% 100% no-repeat;
-  transform: perspective(1400px) rotateX(38deg) rotateZ(-8deg) skewX(-14deg);
-  transform-origin: 50% 0;
-  will-change: transform;
-}
-.comic__shadow-curtain {
-  position: absolute;
-  top: -10%;
-  right: -8%;
-  width: 28%;
-  height: 120%;
-  background: radial-gradient(50% 50% at 70% 50%, rgba(96, 78, 140, 0.1), rgba(96, 78, 140, 0.04) 55%, transparent 75%);
-  transform-origin: 50% 0;
-  animation: curtain-sway 7s ease-in-out infinite;
-}
-@keyframes light-breathe { 0%, 100% { opacity: 1; } 45% { opacity: 0.78; } 60% { opacity: 0.9; } }
-@keyframes curtain-sway { 0%, 100% { transform: skewX(-4deg) translateX(0); } 50% { transform: skewX(5deg) translateX(-3%); } }
+.comic-page__borders { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.comic-page__borders polygon { fill: none; stroke: #5f5d6b; stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+/* In the desk beat one panel's picture pans inside its frame, like parallax through a window. */
+.comic-page [data-panel="lilac"] .board__frame { translate: calc(var(--pan) * -1) 0; scale: 1.08; }
+.comic__frame { position: absolute; inset: 0; pointer-events: none; border: 24px solid #fff; }
+.comic__veil { position: absolute; inset: 0; pointer-events: none; background: #fff; }
+@media (max-width: 700px) { .comic__frame { border-width: 12px; } }
 
-.board { cursor: pointer; }
+.board { position: absolute; inset: 0; cursor: pointer; }
+
 .board__hit { position: absolute; inset: 0; z-index: 4; background: none; border: 0; cursor: pointer; }
 .board__frame { position: absolute; inset: 0; background: #fff; overflow: hidden; }
-.board__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: scale 0.8s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.9s ease-in-out; }
+/* Colour flowing into a panel: the colour layer is revealed through a soft
+   radial mask that grows from the subject, over the greyscale print. */
+@property --color-in { syntax: "<number>"; inherits: true; initial-value: 0; }
+.board__gray { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.board__color {
+  position: absolute;
+  inset: 0;
+  --color-in: 0;
+  -webkit-mask: radial-gradient(circle at var(--from, 50% 45%), #000 calc(var(--color-in) * 150% - 25%), transparent calc(var(--color-in) * 150%));
+  mask: radial-gradient(circle at var(--from, 50% 45%), #000 calc(var(--color-in) * 150% - 25%), transparent calc(var(--color-in) * 150%));
+  transition: --color-in 1.6s cubic-bezier(0.3, 0.6, 0.2, 1);
+}
+.board.is-in .board__color { --color-in: 1; }
+.board__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.9s ease-in-out; }
 /* The base take is always under the others, so a crossfade never shows white. */
 .board__img:first-child, .board__img.is-shown { opacity: 1; }
-.board:hover .board__img { scale: 1.05; }
+.board__frame { transition: scale 0.8s cubic-bezier(0.2, 0.9, 0.3, 1); }
+/* Scale the whole frame (greyscale and colour together), never one layer, so they always line up. */
+.board:hover .board__frame { scale: 1.05; }
+.comic-page [data-panel="lilac"].board:hover .board__frame { scale: 1.12; }
 /* Hover only: the image as three colour channels, pulled apart and jittering. */
 .board__split { position: absolute; inset: 0; background: #fff; isolation: isolate; }
 .board__ch { position: absolute; inset: -8px; mix-blend-mode: multiply; scale: 1.05; animation: jitter 0.24s steps(2) infinite; }
@@ -324,44 +365,51 @@ a { color: inherit; }
 .board__title { font-family: var(--font-display); font-size: clamp(0.95rem, 1.25vw, 1.25rem); line-height: 1.3; }
 .board__meta { font-size: 0.75rem; opacity: 0.72; }
 
-/* Manga balloons: every panel lettered differently. */
-.bubble { position: absolute; z-index: 2; max-width: 44%; pointer-events: none; }
-.bubble__shape { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; fill: #fff; stroke: rgba(67, 51, 99, 0.9); stroke-width: 1.6px; stroke-linejoin: round; }
-.bubble__text { position: relative; font-weight: 700; font-size: clamp(0.78rem, 1.05vw, 1rem); line-height: 1.55; color: #2b2340; }
-.bubble--speech { padding: 12px 20px 30px; }
-.bubble--thought { padding: 16px 24px 34px; font-weight: 500; }
-.bubble--thought .bubble__text { font-weight: 500; }
-.bubble--shout { padding: 30px 34px; }
-.bubble--shout .bubble__text { font-weight: 900; font-size: clamp(0.9rem, 1.3vw, 1.2rem); color: var(--rose); }
-.bubble--box { padding: 6px 12px; }
-.bubble--box .bubble__text { font-family: var(--font-display); font-weight: 400; }
-/* Vertical Japanese in a narrow box, as narration runs in manga. */
-.bubble--tategaki { padding: 12px 8px; writing-mode: vertical-rl; }
-.bubble--tategaki .bubble__text { font-family: var(--font-display); font-weight: 400; font-size: clamp(1rem, 1.5vw, 1.4rem); letter-spacing: 0.12em; }
-.bubble.at-tl { top: 10px; left: 10px; }
-.bubble.at-tr { top: 10px; right: 10px; }
-.bubble.at-tc { top: 10px; left: 50%; translate: -50% 0; }
-.bubble.at-cr { top: 42%; right: 10px; translate: 0 -50%; }
-.bubble.at-cl { top: 42%; left: 10px; translate: 0 -50%; }
-/* Balloons on the right point their tails the other way. */
-.bubble--speech.at-tr .bubble__shape, .bubble--speech.at-cr .bubble__shape, .bubble--thought.at-tr .bubble__shape { transform: scaleX(-1); }
-/* Sound effects: big hand-lettered katakana, outlined, tilted. */
-.sfx {
-  position: absolute;
-  z-index: 2;
+/* Lettering, placed per panel on the picture (content.ts) and sized in page
+   units (--u), so it zooms with the page like print on paper. */
+.letter { position: absolute; z-index: 2; translate: -50% -50%; pointer-events: none; font-size: calc(var(--u, 1px) * var(--fs, 15)); }
+.letter .bubble { position: relative; display: flex; align-items: center; justify-content: center; }
+/* Each column centred along its length, and the block centred in the balloon. */
+.letter .bubble__text { text-align: center; }
+.letter--box .bubble { width: 100%; }
+.bubble__shape { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.bubble__ink { fill: #fff; stroke: rgba(43, 35, 64, 0.9); stroke-width: 1.4px; stroke-linejoin: round; }
+.bubble__fill { fill: #fff; stroke: none; }
+.bubble__text { position: relative; line-height: 1.5; color: #2b2340; }
+/* Dialogue as manga letters it: vertical, in the display face (Zen Antique Soft),
+   in a tall oval that grows a column for every seven or so characters. */
+.bubble--speech, .bubble--thought, .bubble--shout { writing-mode: vertical-rl; }
+.bubble--speech .bubble__text, .bubble--thought .bubble__text, .bubble--shout .bubble__text {
   font-family: var(--font-display);
-  font-size: clamp(1.4rem, 2.6vw, 2.8rem);
-  line-height: 1;
-  letter-spacing: 0.04em;
-  color: #fff;
-  -webkit-text-stroke: 1.5px rgba(67, 51, 99, 0.9);
-  paint-order: stroke fill;
-  text-shadow: 3px 3px 0 var(--ink);
-  pointer-events: none;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  inline-size: max-content;
+  max-inline-size: 7.2em;
 }
-.sfx.at-tl { top: 12px; left: 16px; rotate: -10deg; }
-.sfx.at-tr { top: 14px; right: 18px; rotate: 8deg; }
-.sfx.at-br { bottom: 54px; right: 18px; rotate: -6deg; }
+.bubble--speech { padding: 1.3em 1em; }
+.bubble--thought { padding: 1.5em 1.2em; }
+.bubble--shout { padding: 2em 1.7em; }
+.bubble--shout .bubble__text { font-family: var(--font-body); font-weight: 900; }
+.bubble--box { padding: 0.5em 0.8em; }
+.bubble--box .bubble__text { font-family: var(--font-hand); font-weight: 600; }
+/* The MV's lyric captions: a narrow rounded box, vertical text. */
+.bubble--caption { padding: 0.8em 0.45em; writing-mode: vertical-rl; }
+.bubble--caption .bubble__ink { stroke: #8a8896; stroke-width: 1px; }
+.bubble--caption .bubble__text { font-family: var(--font-display); font-weight: 400; letter-spacing: 0.14em; color: #3a3550; }
+/* Sound effects: hand-lettered katakana inked dark with a white outline. */
+.sfx {
+  display: block;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #2b2340;
+  -webkit-text-stroke: 0.14em #fff;
+  paint-order: stroke fill;
+}
+/* Lettering and tails pop in when the camera lands on the panel. */
+.board .letter { opacity: 0; transition: opacity 0.12s, scale 0.3s cubic-bezier(0.2, 1.6, 0.4, 1); scale: 0.8; }
+.board.is-in .letter { opacity: 1; scale: 1; }
 .board__tags { font-size: 0.8rem; color: var(--ink); }
 
 /* ── Modal ───────────────────────────────────────────────────────────── */
@@ -376,7 +424,7 @@ a { color: inherit; }
   overflow: auto;
   box-shadow: 0 40px 120px -40px rgba(67, 51, 99, 0.45);
 }
-.modal::backdrop { background: rgba(253, 252, 255, 0.8); backdrop-filter: blur(8px); }
+.modal::backdrop { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(8px); }
 .modal__inner { position: relative; display: grid; grid-template-columns: 1.7fr 1fr; }
 .modal__screen { position: relative; aspect-ratio: 16 / 9; background: #fff; overflow: hidden; }
 .modal__screen video, .modal__still { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background-repeat: no-repeat; }
@@ -435,36 +483,44 @@ a { color: inherit; }
 .contact__stage { position: sticky; top: 0; height: 100svh; display: grid; align-content: start; padding: clamp(80px, 14vh, 150px) var(--gutter) 0; }
 .contact__hold { height: 90svh; }
 .contact__stage .fluid { z-index: 0; }
-.contact__stage .manga { position: relative; z-index: 1; }
-.manga { display: grid; grid-template-columns: 1fr 1.15fr; gap: 10px; width: min(560px, 100%); }
-.manga__panel {
-  position: relative;
-  display: grid;
-  place-items: center;
-  padding: clamp(12px, 1.6vw, 22px) clamp(14px, 2vw, 26px);
-  background: #fff;
-  border: 2.5px solid rgba(67, 51, 99, 0.9);
-  box-shadow: 5px 5px 0 rgba(67, 51, 99, 0.16);
-  opacity: 0;
-  transform: scale(0.82) rotate(var(--tilt));
-  transition: opacity 0.2s var(--at), transform 0.55s cubic-bezier(0.2, 1.5, 0.4, 1) var(--at);
+.contact__flare { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.contact__flare > i { position: absolute; visibility: hidden; opacity: 0; }
+.contact__edge { top: 0; bottom: 0; left: 0; width: 60vw; background: linear-gradient(90deg, rgba(253, 226, 218, 0.95), rgba(253, 226, 218, 0.5) 35%, rgba(253, 226, 218, 0)); }
+.contact__streak { left: -10%; top: 70%; width: 120%; height: 16vh; translate: 0 -50%; background: url(/fx/streak.webp) center / 100% 100% no-repeat; }
+
+/* The outro title, set simply: a bold sans in cobalt, slanted, in two staggered
+   lines across the dusk shot (the girl stands in the gap). Letters rise out of
+   their baselines one after another. */
+.contact-title {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  margin: 0;
+  pointer-events: none;
+  font-family: var(--font-body);
+  font-weight: 900;
+  font-size: clamp(3rem, 11.5vh, 9rem);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #fff;
+  /* A faint dusk shade under the white so it holds on the bright parts of the room. */
+  text-shadow: 0 0.04em 0.18em rgba(67, 51, 99, 0.28);
 }
-.manga.is-in .manga__panel { opacity: 1; transform: scale(1) rotate(var(--tilt)); }
-.manga__panel--a { --tilt: -2.5deg; --at: 0s; }
-/* Screentone. */
-.manga__panel--b { --tilt: 1.8deg; --at: 0.3s; background: radial-gradient(rgba(67, 51, 99, 0.18) 1.2px, transparent 1.6px) 0 0 / 9px 9px, #fff; }
-/* Speed lines bursting from the middle. */
-.manga__panel--c {
-  --tilt: -1deg;
-  --at: 0.65s;
-  grid-column: 1 / -1;
-  background:
-    radial-gradient(circle at 50% 50%, #fff 28%, transparent 62%),
-    repeating-conic-gradient(from 3deg at 50% 50%, rgba(238, 122, 168, 0.28) 0deg 0.9deg, transparent 0.9deg 11deg),
-    repeating-conic-gradient(from 0deg at 50% 50%, rgba(238, 122, 168, 0.22) 0deg 1.6deg, transparent 1.6deg 7deg),
-    #fff;
+.contact-title__line { position: absolute; display: flex; white-space: nowrap; transform: skewX(-11deg); }
+.contact-title__line--1 { left: 3%; top: 21%; }
+.contact-title__line--2 { left: 52%; top: 45%; }
+.contact-title__mask { display: inline-block; overflow: hidden; padding: 0.06em 0.02em 0.1em; margin: -0.06em -0.02em -0.1em; }
+.contact-title__char { display: inline-block; translate: 0 110%; transition: translate 0.7s cubic-bezier(0.2, 0.9, 0.2, 1); }
+.contact-title.is-in .contact-title__char { translate: 0 0; }
+@media (max-width: 700px) {
+  .contact-title { font-size: 12.5vw; }
+  .contact-title__line--1 { left: 5%; top: 18%; }
+  .contact-title__line--2 { left: auto; right: 5%; top: 30%; }
 }
-.manga__panel .stroke-text { width: 100%; display: grid; justify-items: center; }
+/* Bloom over the room as the white parts: a baked glow of its highlights, screened. */
+.contact__bloom { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0; mix-blend-mode: screen; overflow: hidden; }
+.contact__bloom-glow { position: absolute; top: 0; left: 0; background: url(/fx/bloom.webp) center / 100% 100% no-repeat; }
+.contact__bloom-wash { position: absolute; inset: 0; opacity: 0; background: radial-gradient(60% 55% at 50% 42%, rgba(255, 250, 244, 0.95), rgba(255, 236, 240, 0.35) 55%, rgba(255, 236, 240, 0) 80%); }
 .contact__sheet { position: relative; z-index: 1; margin-top: -8svh; background: var(--paper); }
 .contact__wave { position: absolute; left: 0; bottom: calc(100% - 1px); width: 100%; height: 48px; fill: var(--paper); transform: scaleY(-1); }
 .contact__inner { padding: clamp(20px, 4vw, 40px) var(--gutter) 48px; }
@@ -495,8 +551,8 @@ a { color: inherit; }
 }
 
 /* ── Reduced motion ──────────────────────────────────────────────────── */
-html.reduce-motion .manga__panel { transition: none; }
-html.reduce-motion .comic__shadow, html.reduce-motion .comic__shadow-curtain, html.reduce-motion .board__ch { animation: none; }
+html.reduce-motion .contact-title__char, html.reduce-motion .board__color { transition: none; }
+html.reduce-motion .board__ch { animation: none; }
 html.reduce-motion .marquee__track,
 html.reduce-motion .hero__scroll i,
 html.reduce-motion .board:hover .board__still { animation: none; }

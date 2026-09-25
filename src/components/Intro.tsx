@@ -38,7 +38,7 @@ export function Intro({ ready, onReveal, onDone }: Props) {
       if (finished) return;
       finished = true;
       timeline?.kill();
-      gsap.set(view, { settle: 1 });
+      gsap.set(view, { settle: 1, lift: 0, ca: 0.18 });
       if (stage) stage.style.filter = "";
       onReveal();
       setGone(true);
@@ -57,7 +57,9 @@ export function Intro({ ready, onReveal, onDone }: Props) {
         timeline = gsap.timeline({ onComplete: finish }).to(el, { autoAlpha: 0, duration: 0.5, delay: 0.2 });
         return;
       }
-      gsap.set(view, { settle: 1.1 });
+      // The room starts close, its loose things thrown out toward the lens and the
+      // lens fringing; everything settles back into place as the frame opens.
+      gsap.set(view, { settle: 1.35, lift: 0.55, ca: 1 });
       const blur = { px: window.innerWidth < 768 ? 6 : 10 };
       const setBlur = () => { if (stage) stage.style.filter = blur.px > 0.05 ? `blur(${blur.px}px)` : ""; };
       setBlur();
@@ -69,7 +71,9 @@ export function Intro({ ready, onReveal, onDone }: Props) {
         // The white parts and the full shot opens, coming into focus.
         .to(bars, { "--bar": 0, duration: 1.3, ease: "expo.inOut" }, 1.35)
         .to(blur, { px: 0, duration: 1.2, ease: "power2.out", onUpdate: setBlur }, 1.5)
-        .fromTo(view, { settle: 1.1 }, { settle: 1, duration: 2.2, ease: "expo.out" }, 1.4)
+        .fromTo(view, { settle: 1.35 }, { settle: 1, duration: 2.6, ease: "expo.out" }, 1.3)
+        .fromTo(view, { lift: 0.55 }, { lift: 0, duration: 2.4, ease: "power3.out" }, 1.35)
+        .fromTo(view, { ca: 1 }, { ca: 0.18, duration: 2.2, ease: "power2.out" }, 1.4)
         // Start painting the title as the frame opens; it is finished soon after.
         .add(() => onReveal(), 1.75)
         .set(el, { pointerEvents: "none" }, 2.5)

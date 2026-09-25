@@ -1,0 +1,497 @@
+{
+  "note": "The comic page, in page units. Shared by src/components/ComicPage.tsx and scripts/cut-panels.mjs (crop aspects come from each panel's box).",
+  "landscape": {
+    "size": [
+      1000,
+      1400
+    ],
+    "panels": [
+      {
+        "id": "title",
+        "poly": [
+          [
+            560,
+            40
+          ],
+          [
+            960,
+            40
+          ],
+          [
+            960,
+            440
+          ],
+          [
+            475,
+            440
+          ]
+        ]
+      },
+      {
+        "id": "lilac",
+        "poly": [
+          [
+            40,
+            40
+          ],
+          [
+            530,
+            40
+          ],
+          [
+            445,
+            440
+          ],
+          [
+            40,
+            440
+          ]
+        ]
+      },
+      {
+        "id": "afterschool",
+        "poly": [
+          [
+            40,
+            470
+          ],
+          [
+            960,
+            470
+          ],
+          [
+            960,
+            700
+          ],
+          [
+            40,
+            700
+          ]
+        ],
+        "halftone": true
+      },
+      {
+        "id": "curtain",
+        "poly": [
+          [
+            960,
+            730
+          ],
+          [
+            960,
+            1060
+          ],
+          [
+            683,
+            1060
+          ]
+        ]
+      },
+      {
+        "id": "desk",
+        "poly": [
+          [
+            40,
+            730
+          ],
+          [
+            920,
+            730
+          ],
+          [
+            643,
+            1060
+          ],
+          [
+            40,
+            1060
+          ]
+        ]
+      },
+      {
+        "id": "sky",
+        "poly": [
+          [
+            527,
+            1090
+          ],
+          [
+            960,
+            1090
+          ],
+          [
+            960,
+            1360
+          ],
+          [
+            594,
+            1360
+          ]
+        ],
+        "halftone": true
+      },
+      {
+        "id": "pages",
+        "poly": [
+          [
+            40,
+            1090
+          ],
+          [
+            497,
+            1090
+          ],
+          [
+            564,
+            1360
+          ],
+          [
+            40,
+            1360
+          ]
+        ]
+      }
+    ]
+  },
+  "portrait": {
+    "size": [
+      1000,
+      2935
+    ],
+    "panels": [
+      {
+        "id": "title",
+        "poly": [
+          [
+            40,
+            40
+          ],
+          [
+            960,
+            40
+          ],
+          [
+            960,
+            468
+          ],
+          [
+            40,
+            372
+          ]
+        ]
+      },
+      {
+        "id": "lilac",
+        "poly": [
+          [
+            40,
+            417
+          ],
+          [
+            960,
+            513
+          ],
+          [
+            960,
+            797
+          ],
+          [
+            40,
+            893
+          ]
+        ]
+      },
+      {
+        "id": "afterschool",
+        "poly": [
+          [
+            40,
+            923
+          ],
+          [
+            960,
+            827
+          ],
+          [
+            960,
+            1303
+          ],
+          [
+            40,
+            1207
+          ]
+        ],
+        "halftone": true
+      },
+      {
+        "id": "curtain",
+        "poly": [
+          [
+            40,
+            1237
+          ],
+          [
+            960,
+            1333
+          ],
+          [
+            960,
+            1617
+          ],
+          [
+            40,
+            1713
+          ]
+        ]
+      },
+      {
+        "id": "desk",
+        "poly": [
+          [
+            40,
+            1743
+          ],
+          [
+            960,
+            1647
+          ],
+          [
+            960,
+            2123
+          ],
+          [
+            40,
+            2027
+          ]
+        ]
+      },
+      {
+        "id": "sky",
+        "poly": [
+          [
+            40,
+            2057
+          ],
+          [
+            960,
+            2153
+          ],
+          [
+            960,
+            2437
+          ],
+          [
+            40,
+            2533
+          ]
+        ],
+        "halftone": true
+      },
+      {
+        "id": "pages",
+        "poly": [
+          [
+            40,
+            2563
+          ],
+          [
+            960,
+            2467
+          ],
+          [
+            960,
+            2895
+          ],
+          [
+            40,
+            2895
+          ]
+        ]
+      }
+    ]
+  },
+  "stops": [
+    {
+      "panel": "title",
+      "hold": 1.6,
+      "dir": 180
+    },
+    {
+      "panel": "lilac",
+      "hold": 2.0,
+      "dir": 200,
+      "punch": true
+    },
+    {
+      "panel": "afterschool",
+      "hold": 1.4,
+      "dir": 160
+    },
+    {
+      "panel": "afterschool",
+      "hold": 1.2,
+      "dir": 20,
+      "reframe": {
+        "zoomOut": 0.75,
+        "take": 1
+      }
+    },
+    {
+      "panel": "curtain",
+      "hold": 1.8,
+      "dir": 250,
+      "punch": true
+    },
+    {
+      "panel": "desk",
+      "hold": 1.6,
+      "dir": 190
+    },
+    {
+      "panel": "sky",
+      "hold": 1.6,
+      "dir": 170
+    },
+    {
+      "panel": "pages",
+      "hold": 1.6,
+      "dir": 210,
+      "punch": true
+    },
+    {
+      "panel": "pages+sky",
+      "hold": 2.2,
+      "dir": 0,
+      "desk": true
+    }
+  ],
+  "stopsPortrait": [
+    {
+      "panel": "title",
+      "hold": 1.2,
+      "dir": 180,
+      "focus": [
+        0.5,
+        0.5
+      ],
+      "zoom": 1.7
+    },
+    {
+      "panel": "lilac",
+      "hold": 1.0,
+      "dir": 200,
+      "focus": [
+        0.72,
+        0.5
+      ]
+    },
+    {
+      "panel": "lilac",
+      "hold": 1.1,
+      "dir": 160,
+      "focus": [
+        0.28,
+        0.5
+      ],
+      "punch": true
+    },
+    {
+      "panel": "afterschool",
+      "hold": 1.0,
+      "dir": 200,
+      "focus": [
+        0.72,
+        0.5
+      ]
+    },
+    {
+      "panel": "afterschool",
+      "hold": 1.1,
+      "dir": 20,
+      "focus": [
+        0.28,
+        0.5
+      ]
+    },
+    {
+      "panel": "curtain",
+      "hold": 1.0,
+      "dir": 250,
+      "focus": [
+        0.72,
+        0.5
+      ],
+      "punch": true
+    },
+    {
+      "panel": "curtain",
+      "hold": 1.0,
+      "dir": 160,
+      "focus": [
+        0.28,
+        0.5
+      ]
+    },
+    {
+      "panel": "desk",
+      "hold": 1.0,
+      "dir": 200,
+      "focus": [
+        0.72,
+        0.5
+      ]
+    },
+    {
+      "panel": "desk",
+      "hold": 1.0,
+      "dir": 160,
+      "focus": [
+        0.28,
+        0.5
+      ]
+    },
+    {
+      "panel": "sky",
+      "hold": 1.0,
+      "dir": 200,
+      "focus": [
+        0.72,
+        0.5
+      ]
+    },
+    {
+      "panel": "sky",
+      "hold": 1.0,
+      "dir": 160,
+      "focus": [
+        0.28,
+        0.5
+      ]
+    },
+    {
+      "panel": "pages",
+      "hold": 1.0,
+      "dir": 200,
+      "focus": [
+        0.72,
+        0.5
+      ]
+    },
+    {
+      "panel": "pages",
+      "hold": 1.1,
+      "dir": 160,
+      "focus": [
+        0.28,
+        0.5
+      ],
+      "punch": true
+    },
+    {
+      "panel": "sky+pages",
+      "hold": 1.8,
+      "dir": 0,
+      "desk": true
+    }
+  ]
+}

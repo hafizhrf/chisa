@@ -2,13 +2,13 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef, useState } from "react";
 import { content, SECTIONS, type Work } from "../content";
+import { ComicPage } from "../components/ComicPage";
 import { ContactForm } from "../components/ContactForm";
 import { FluidBars } from "../components/FluidBars";
 import { KineticText } from "../components/KineticText";
 import { LiquidEdge } from "../components/LiquidEdge";
 import { SectionTitle } from "../components/SectionTitle";
 import { StrokeText } from "../components/StrokeText";
-import { WorkCard } from "../components/WorkCard";
 import { Stage, view } from "../gl/Stage";
 
 const useNarrow = (query = "(max-width: 700px)") => {
@@ -112,19 +112,24 @@ export function About() {
           className="fluid--profile"
           top={
             <div className="about__top">
-              <p className="about__eyebrow">Profile</p>
-              <StrokeText as="h2" text={about.heading} size="clamp(2.4rem, 5.4vw, 4.8rem)" ink="var(--indigo)" play={play} weight={11} />
+              <div className="about__tilt">
+                <p className="about__eyebrow">Profile</p>
+                <StrokeText as="h2" text={about.heading} size="clamp(2.4rem, 5.4vw, 4.8rem)" ink="var(--indigo)" play={play} weight={11} outline={10} />
+              </div>
             </div>
           }
           bottom={
             <div className="about__bottom">
-              <p className="about__lead">{about.lead}</p>
-              <p className="about__body">{about.body[0]}</p>
-              <p className="about__facts">{facts}</p>
+              <div className="about__tilt">
+                <p className="about__lead">{about.lead}</p>
+                <p className="about__body">{about.body[0]}</p>
+                <p className="about__facts">{facts}</p>
+              </div>
             </div>
           }
         />
         <div ref={pop} className="about__pop" aria-hidden="true">
+          {/* The very same file the canvas draws, so the hand-over on the pin is invisible. */}
           <img src="/sprites/character.png" alt="" />
           <img className="about__pop-silhouette" src="/sprites/character.png" alt="" />
         </div>
@@ -133,48 +138,12 @@ export function About() {
   );
 }
 
-/** Where each work sits on the comic page (16 columns × 6 rows), in reading order. */
-const PANELS = [
-  { col: "4 / 9", row: "1 / 5" },
-  { col: "4 / 7", row: "5 / 7" },
-  { col: "7 / 9", row: "5 / 7" },
-  { col: "9 / 13", row: "1 / 3" },
-  { col: "9 / 13", row: "3 / 7" },
-  { col: "13 / 17", row: "1 / 7" },
-];
-
-/**
- * The works as one giant comic page the camera pans across while you scroll
- * (choreography.ts pins it and slides the page). Every work is a panel; the
- * shadow of the classroom's window frames falls across the page and drifts
- * at its own pace, as if the comic lay on a desk by the window.
- */
+/** The works as one comic page the camera reads (see ComicPage). */
 export function Works({ onOpen }: { onOpen: (work: Work) => void }) {
-  // The title paints once the page has faded up, not while it is still invisible.
-  const [play, setPlay] = useState(false);
-  const ref = useRef<HTMLElement>(null);
-  useEffect(() => {
-    // Right as the page finishes fading up (the first ~0.45 screen of its pin).
-    const trigger = ScrollTrigger.create({ trigger: ref.current, start: "top -30%", onEnter: () => setPlay(true) });
-    return () => trigger.kill();
-  }, []);
   return (
-    <section ref={ref} id="works" className="works" aria-label={SECTIONS[2].label}>
+    <section id="works" className="works" aria-label={SECTIONS[2].label}>
       <div className="works__sticky">
-        <div className="comic">
-          <div className="comic__panel comic__panel--title" style={{ gridColumn: "1 / 4", gridRow: "1 / 7" }}>
-            <SectionTitle label="Selected works" jp="ワークス" size="clamp(3rem, 7vw, 6.5rem)" play={play} />
-            <p className="comic__hint">Scroll to read, click a panel to open it.</p>
-          </div>
-          {content.works.map((work, i) => (
-            <WorkCard key={work.id} work={work} index={i} onOpen={onOpen} style={{ gridColumn: PANELS[i % PANELS.length].col, gridRow: PANELS[i % PANELS.length].row }} />
-          ))}
-        </div>
-        {/* Light through the classroom window, lying across the page. */}
-        <div className="comic__shadow" aria-hidden="true">
-          <i className="comic__shadow-frame" />
-          <i className="comic__shadow-curtain" />
-        </div>
+        <ComicPage onOpen={onOpen} />
       </div>
     </section>
   );
@@ -223,23 +192,48 @@ export function Contact() {
     });
     return () => trigger.kill();
   }, []);
+  // Keep the bloom registered to the room as the camera eases back.
+  useEffect(() => {
+    const glow = ref.current!.querySelector<HTMLElement>(".contact__bloom-glow")!;
+    const tick = () => {
+      const bloom = glow.parentElement!;
+      if (+getComputedStyle(bloom).opacity < 0.001) return;
+      const r = Stage.current?.screenRect("plate:scene");
+      if (!r) return;
+      glow.style.width = `${r.w}px`;
+      glow.style.height = `${r.h}px`;
+      glow.style.transform = `translate3d(${r.cx - r.w / 2}px, ${r.cy - r.h / 2}px, 0)`;
+    };
+    gsap.ticker.add(tick);
+    return () => gsap.ticker.remove(tick);
+  }, []);
   return (
     <section ref={ref} id="contact" className="contact" aria-label={SECTIONS[4].label}>
       <div className="contact__stage">
         {/* The white of the pages above carries on as closed bars; they part on the dusk room. */}
         <FluidBars className="fluid--contact" />
-        {/* Three comic panels snap in one after another; the words paint inside them. */}
-        <div className={`manga ${play ? "is-in" : ""}`}>
-          <div className="manga__panel manga__panel--a">
-            <StrokeText text="LET'S" size="clamp(2.4rem, 5.4vw, 5rem)" play={play} delay={0.15} weight={12} speed={1200} pace={0.5} shadow="#cfe6f8" />
-          </div>
-          <div className="manga__panel manga__panel--b">
-            <StrokeText text="MAKE" size="clamp(2.4rem, 5.4vw, 5rem)" play={play} delay={0.45} weight={12} ink="var(--indigo)" speed={1200} pace={0.5} shadow="#fff" />
-          </div>
-          <div className="manga__panel manga__panel--c">
-            <StrokeText text="SOMETHING!" size="clamp(2.6rem, 6vw, 5.6rem)" play={play} delay={0.8} weight={12} ink="var(--rose)" speed={1200} pace={0.5} shadow="#f9d3e2" />
-          </div>
+        {/* The light as they part lives in this shot, under the form sheet, so the sheet covers it. */}
+        <div className="contact__flare" aria-hidden="true">
+          <i className="contact__edge" />
+          <i className="contact__streak" />
         </div>
+        {/* The bloom as the room opens: its brightest light haloed and hazed, screened over it. */}
+        <div className="contact__bloom" aria-hidden="true">
+          <i className="contact__bloom-glow" />
+          <i className="contact__bloom-wash" />
+        </div>
+        {/* The title, set simply across the shot in two staggered lines; she stands in the gap. */}
+        <h2 className={`contact-title ${play ? "is-in" : ""}`} aria-label="Let's make something!">
+          {["LET'S MAKE", "SOMETHING!"].map((line, l) => (
+            <span key={line} className={`contact-title__line contact-title__line--${l + 1}`} aria-hidden="true">
+              {[...line].map((ch, i) => (
+                <span key={i} className="contact-title__mask">
+                  <span className="contact-title__char" style={{ transitionDelay: `${0.12 + l * 0.35 + i * 0.035}s` }}>{ch === " " ? "\u00a0" : ch}</span>
+                </span>
+              ))}
+            </span>
+          ))}
+        </h2>
       </div>
       {/* The dusk shot holds, title painted, before the sheet rises over it. */}
       <div className="contact__hold" aria-hidden="true" />

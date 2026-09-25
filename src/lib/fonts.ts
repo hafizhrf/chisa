@@ -7,7 +7,7 @@ import { content, SECTIONS } from "../content";
  * every face with every Japanese character the page uses, up front; the intro
  * waits on document.fonts.ready, so by the time the page shows they are here.
  */
-const FACES = ['400 1em "Zen Antique Soft"', '500 1em "Zen Kaku Gothic New"', '700 1em "Zen Kaku Gothic New"', '900 1em "Zen Kaku Gothic New"'];
+const FACES = ['600 1em "Klee One"', '400 1em "Zen Antique Soft"', '500 1em "Zen Kaku Gothic New"', '700 1em "Zen Kaku Gothic New"', '900 1em "Zen Kaku Gothic New"'];
 
 export const preloadJapaneseGlyphs = () => {
   const text = [
