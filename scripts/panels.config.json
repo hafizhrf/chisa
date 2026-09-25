@@ -1,0 +1,79 @@
+{
+  "note": "One pre-cut image per comic panel: source still, focal point (0..1), zoom (1 = the whole width), rough aspect (w/h), and optional variants (same shot, e.g. a smile) cut with the identical box for crossfading.",
+  "panels": [
+    {
+      "id": "lilac",
+      "file": "Gemini_Generated_Image_vnrz0zvnrz0zvnrz.jpeg",
+      "focus": [
+        0.5,
+        0.42
+      ],
+      "zoom": 1.8,
+      "aspect": 2.4,
+      "variants": [
+        "smile.jpeg",
+        "side.jpeg"
+      ]
+    },
+    {
+      "id": "afterschool",
+      "file": "Gemini_Generated_Image_q5r4kyq5r4kyq5r4.jpeg",
+      "focus": [
+        0.5,
+        0.33
+      ],
+      "zoom": 1.9,
+      "aspect": 2.9,
+      "variants": [
+        "sleep.jpeg"
+      ]
+    },
+    {
+      "id": "curtain",
+      "file": "Gemini_Generated_Image_vnrz0zvnrz0zvnrz.jpeg",
+      "focus": [
+        0.86,
+        0.35
+      ],
+      "zoom": 2.4,
+      "aspect": 1.9
+    },
+    {
+      "id": "desk",
+      "file": "Gemini_Generated_Image_vnrz0zvnrz0zvnrz.jpeg",
+      "focus": [
+        0.5,
+        0.86
+      ],
+      "zoom": 2.2,
+      "aspect": 3.9
+    },
+    {
+      "id": "sky",
+      "file": "Gemini_Generated_Image_vnrz0zvnrz0zvnrz.jpeg",
+      "focus": [
+        0.72,
+        0.4
+      ],
+      "zoom": 2.2,
+      "aspect": 1.9
+    },
+    {
+      "id": "pages",
+      "file": "Gemini_Generated_Image_q5r4kyq5r4kyq5r4.jpeg",
+      "focus": [
+        0.3,
+        0.55
+      ],
+      "zoom": 1.6,
+      "aspect": 1.3,
+      "variants": [
+        "sleep.jpeg"
+      ]
+    }
+  ],
+  "widths": [
+    800,
+    1600
+  ]
+}
