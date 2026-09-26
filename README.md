@@ -24,6 +24,14 @@ tools, socials and email. Brush-lettered titles can use A–Z, 0–9, `- — / .
 
 ## Art pipeline
 
+The Milestone section sits between Skills and Contact. Edit `content.milestone` in
+`src/content.ts` to update the savings amount (IDR); the target defaults to Rp2,000,000.
+`npm run milestone-assets` builds its responsive establishing shot, transparent
+green-screen character PNG, and clean blackboard plate in `public/milestone/` from
+the original illustrations and `public/bg/blackboard.jpg`. It does not replace the sources.
+The scroll shot wipes to white before revealing the cutout and savings note; reduced
+motion and short viewports show the final composition directly.
+
 Source illustrations live in `art/source/`. `npm run sprites` cuts every white-background image into one
 transparent PNG per object (`public/sprites/*.png` + `manifest.json`), builds the scene plate with the
 character painted out underneath, and writes WebP plates to `public/bg/`. `scripts/sprites.config.json`

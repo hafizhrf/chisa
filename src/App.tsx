@@ -16,6 +16,7 @@ import { flare, tickFlare } from "./lib/flare";
 import { isReduced, onMotionChange } from "./lib/motion";
 import { startPointer, tickPointer } from "./lib/pointer";
 import { About, Contact, Hero, Skills, Works } from "./sections/Sections";
+import { Milestone } from "./sections/Milestone";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -109,6 +110,7 @@ export default function App() {
         <About />
         <Works onOpen={setWork} />
         <Skills />
+        <Milestone />
         <Contact />
       </main>
       <CharacterCutout />

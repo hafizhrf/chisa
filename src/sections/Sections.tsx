@@ -184,7 +184,7 @@ export function Contact() {
     return () => gsap.ticker.remove(tick);
   }, []);
   return (
-    <section ref={ref} id="contact" className="contact" aria-label={SECTIONS[4].label}>
+    <section ref={ref} id="contact" className="contact" aria-label={SECTIONS[5].label}>
       <div className="contact__stage">
         {/* The white of the pages above carries on as closed bars; they part on the dusk room. */}
         <FluidBars className="fluid--contact" />

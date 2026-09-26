@@ -75,6 +75,15 @@ export const content = {
     status: "Open for commission, Q4 2026",
   },
 
+  milestone: {
+    heading: "Milestone",
+    jp: "マイルストーン",
+    aside: "少しずつ…！",
+    body: "Author lagi nabung biar bisa komis ke artist beneran, sekarang masih pake AI Generated image soalnya :)",
+    saved: 250000,
+    target: 2000000,
+  },
+
   works: [
     {
       id: "lilac",
@@ -398,5 +407,6 @@ export const SECTIONS = [
   { id: "profile", label: "Profile", jp: "プロフィール" },
   { id: "works", label: "Works", jp: "ワークス" },
   { id: "arsenal", label: "Skills", jp: "スキル" },
+  { id: "milestone", label: "Milestone", jp: "マイルストーン" },
   { id: "contact", label: "Contact", jp: "コンタクト" },
 ] as const;
