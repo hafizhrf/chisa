@@ -37,6 +37,8 @@ export default function App() {
   const [reduced, setReduced] = useState(isReduced());
   const [introFallback, setIntroFallback] = useState(false);
 
+  useEffect(() => onMotionChange(setReduced), []);
+
   useEffect(() => {
     // The intro always starts at the top of the page.
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
@@ -54,7 +56,7 @@ export default function App() {
     }
     instance.setReduced(isReduced());
     Stage.current = instance;
-    const offMotion = onMotionChange((r) => { instance.setReduced(r); setReduced(r); });
+    const offMotion = onMotionChange((r) => instance.setReduced(r));
     // One clock for everything: pointer smoothing, the light, the room.
     const tick = (_: number, delta: number) => {
       const dt = Math.min(0.05, delta / 1000);

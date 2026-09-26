@@ -21,15 +21,15 @@ import { view } from "../gl/Stage";
  */
 export const setupChoreography = ({ setActive, reduced }: { setActive: (index: number) => void; reduced: boolean }) => {
   const ctx = gsap.context(() => {
-    const narrow = window.innerWidth < 700;
-    const push = reduced ? 1 : narrow ? 1.45 : 2.1;
+    const push = () => reduced ? 1 : window.innerWidth < 700 ? 1.45 : 2.1;
     const bars = ".fluid--profile";
 
-    // Opening: pinned; the title comes apart letter by letter while the room starts to move.
-    // Each letter is two groups (white stroke and ink); move them as one.
-    const groups = gsap.utils.toArray<SVGGElement>(".hero h1 .st-char");
+    // Move the ink and white outline together for each letter as the title scatters.
     const byChar = new Map<string, SVGGElement[]>();
-    groups.forEach((g) => byChar.set(g.dataset.char!, [...(byChar.get(g.dataset.char!) ?? []), g]));
+    gsap.utils.toArray<SVGGElement>(".hero h1 .st-char").forEach((group) => {
+      const char = group.dataset.char!;
+      byChar.set(char, [...(byChar.get(char) ?? []), group]);
+    });
     const letters = [...byChar.values()];
     const order = letters.map((_, i) => i).sort((a, b) => ((a * 7919) % 13) - ((b * 7919) % 13));
     // Lenis already eases the scroll. Keep this camera on the same scroll
@@ -39,6 +39,7 @@ export const setupChoreography = ({ setActive, reduced }: { setActive: (index: n
       scrollTrigger: { trigger: "#opening", start: "top top", end: "bottom bottom", scrub: true },
     })
       .fromTo(view, { zoom: 1, lift: 0 }, { zoom: reduced ? 1 : 1.22, lift: reduced ? 0 : 1, duration: 1, ease: "power1.in", immediateRender: false }, 0)
+      .fromTo(".stage canvas", { filter: "blur(0px)" }, { filter: reduced ? "blur(0px)" : "blur(1.5px)", duration: 1, ease: "power1.in", immediateRender: false }, 0)
       // The lens fringe clears before the profile pin so the same DOM
       // character stays visually aligned as the room moves behind her.
       .fromTo(view, { ca: 0.18, charLight: 1 }, { ca: 0, charLight: 0, duration: 0.8, immediateRender: false }, 0);
@@ -48,19 +49,21 @@ export const setupChoreography = ({ setActive, reduced }: { setActive: (index: n
     })
       .to(".hero__sub .stroke-text", { xPercent: -30, opacity: 0, duration: 0.45, ease: "power2.in" }, 0.2)
       .to(".hero__role", { y: 40, opacity: 0, duration: 0.3 }, 0.1)
-      .to(".hero__scroll", { opacity: 0, duration: 0.1 }, 0)
-      // The white gradient stays pinned with the shot and fades where it is.
-      .to(".hero__scrim", { opacity: 0, duration: 0.45, ease: "power1.in" }, 0.15);
-    letters.forEach((pair, i) => {
-      opening.to(pair, {
-        y: -(120 + ((i * 53) % 90)),
-        x: ((i * 37) % 60) - 30,
-        rotate: ((i * 29) % 40) - 20,
-        opacity: 0,
-        duration: 0.5,
-        ease: "power2.in",
-      }, 0.1 + order.indexOf(i) * 0.045);
-    });
+      .to(".hero__scroll", { opacity: 0, duration: 0.1 }, 0);
+    if (reduced) {
+      opening.to(".hero h1", { opacity: 0, duration: 0.38 }, 0.15);
+    } else {
+      letters.forEach((pair, i) => {
+        opening.to(pair, {
+          y: -(120 + ((i * 53) % 90)),
+          x: ((i * 37) % 60) - 30,
+          rotate: ((i * 29) % 40) - 20,
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.in",
+        }, 0.1 + order.indexOf(i) * 0.045);
+      });
+    }
 
     const profile = gsap.timeline({
       defaults: { ease: "none" },
@@ -71,6 +74,7 @@ export const setupChoreography = ({ setActive, reduced }: { setActive: (index: n
         start: "top top",
         end: "bottom bottom",
         scrub: true,
+        invalidateOnRefresh: true,
       },
     });
     profile
@@ -78,7 +82,13 @@ export const setupChoreography = ({ setActive, reduced }: { setActive: (index: n
       // its stacking order changes so the bars can close behind her.
       .fromTo(view, { props: 1 }, { props: 0, duration: 0.06, immediateRender: false }, 0)
       // Dolly in on her; the curtains rush past and go.
-      .fromTo(view, { zoom: reduced ? 1 : 1.22, focusX: 0, focusY: 0 }, { zoom: push, focusX: 0, focusY: -30, duration: 0.35, ease: "power1.inOut", immediateRender: false }, 0)
+      .fromTo(view, { zoom: reduced ? 1 : 1.22, focusX: 0, focusY: 0 }, { zoom: push, focusX: 0, focusY: reduced ? 0 : -30, duration: 0.35, ease: "power1.inOut", immediateRender: false }, 0)
+      // Only the canvas room defocuses; the shared DOM character stays sharp.
+      .fromTo(".stage canvas", { filter: reduced ? "blur(0px)" : "blur(1.5px)" },
+        { filter: reduced ? "blur(0px)" : "blur(8px)", duration: 0.35, ease: "power1.inOut", immediateRender: false }, 0)
+      // Clear the lens under the white bloom so the desk and later scenes stay sharp.
+      .fromTo(".stage canvas", { filter: reduced ? "blur(0px)" : "blur(8px)" },
+        { filter: "blur(0px)", duration: 0.08, immediateRender: false }, 0.55)
       .to(view, { curtains: 0, duration: 0.1 }, 0.26)
       // The frame squeezes behind her: cinemascope, then a band.
       .fromTo(bars, { "--bar": 0 }, { "--bar": 0.12, duration: 0.2, ease: "power2.inOut" }, 0.06)
@@ -86,10 +96,14 @@ export const setupChoreography = ({ setActive, reduced }: { setActive: (index: n
       // Backlit beat: the illustrated character darkens gradually on white.
       .to(view, { flat: 1, duration: 0.08, ease: "power1.inOut" }, 0.31)
       .to(view, { shadow: 1, duration: 0.1, ease: "power1.inOut" }, 0.33)
-      .to(view, { zoom: push * 1.12, duration: 0.13, ease: "power2.out" }, 0.35)
+      .to(view, { zoom: () => reduced ? 1 : push() * 1.12, duration: 0.13, ease: "power2.out" }, 0.35)
+      // Low-contrast window geometry travels behind the shared character, then leaves.
+      .fromTo(".about__window-shadow", { autoAlpha: 0, x: reduced ? 0 : -40, y: reduced ? 0 : 16 },
+        { autoAlpha: reduced ? 0 : 0.12, x: reduced ? 0 : 16, y: reduced ? 0 : -8, duration: 0.38, ease: "none", immediateRender: false }, 0.06)
+      .fromTo(".about__window-shadow", { autoAlpha: reduced ? 0 : 0.12 }, { autoAlpha: 0, duration: 0.06, immediateRender: false }, 0.55)
       // Warm light is masked to the PNG; the surrounding white remains clean.
       .to(view, { flare: reduced ? 0 : 0.92, duration: 0.15, ease: "sine.inOut" }, 0.35)
-      .to(view, { flare: 0.62, duration: 0.11, ease: "sine.inOut" }, 0.5)
+      .to(view, { flare: reduced ? 0 : 0.62, duration: 0.11, ease: "sine.inOut" }, 0.5)
       .to(view, { flare: 0, duration: 0.08 }, 0.61)
       // The ring and streak stay behind the character as faint light accents.
       .fromTo(".ofx-ring:not(.ofx-ring--thin)", { autoAlpha: 0, scale: 0.82 }, { autoAlpha: reduced ? 0 : 0.25, scale: 1, duration: 0.1, immediateRender: false }, 0.38)
@@ -98,18 +112,18 @@ export const setupChoreography = ({ setActive, reduced }: { setActive: (index: n
       .to(".ofx-ring--thin", { autoAlpha: 0, scale: 1.13, duration: 0.16 }, 0.49)
       .fromTo(".ofx-streak", { autoAlpha: 0, scaleX: 0.35, xPercent: -8 }, { autoAlpha: reduced ? 0 : 0.2, scaleX: 1, xPercent: 0, duration: 0.11, immediateRender: false }, 0.42)
       .to(".ofx-streak", { autoAlpha: 0, scaleX: 1.4, xPercent: 6, duration: 0.14 }, 0.53)
-      .fromTo(".ofx-white", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.08, immediateRender: false }, 0.55)
+      .fromTo(".ofx-white", { autoAlpha: 0 }, { autoAlpha: reduced ? 0 : 1, duration: 0.08, immediateRender: false }, 0.55)
       .to(".ofx-white", { autoAlpha: 0, duration: 0.1 }, 0.63)
       // Cut under the white bloom: the desk arrives framed in the band.
       .set(view, { scene: 0, character: 0 }, 0.63)
       .set(view, { desk: 1, deskSleep: 1 }, 0.63)
       .to(view, { flat: 0, duration: 0.05 }, 0.64)
-      .fromTo(view, { deskZoom: 1.3 }, { deskZoom: 1.6, duration: 0.35, ease: "power1.out" }, 0.64)
+      .fromTo(view, { deskZoom: reduced ? 1 : 1.3 }, { deskZoom: reduced ? 1 : 1.6, duration: 0.35, ease: "power1.out" }, 0.64)
       // She starts with her eyes closed, then looks up as the profile is read.
       .fromTo(view, { deskSleep: 1 }, { deskSleep: 0, duration: 0.08, ease: "power1.inOut", immediateRender: false }, 0.77)
-      .fromTo(bars, { "--bar": 0.3 }, { "--bar": 0.26, duration: 0.08, ease: "power2.out", immediateRender: false }, 0.64)
+      .fromTo(bars, { "--bar": 0.3 }, { "--bar": () => window.innerWidth <= 720 ? 0.35 : 0.28, duration: 0.06, ease: "power2.out", immediateRender: false }, 0.64)
       // Close to white before the pin lets go, including on a fast scroll.
-      .to(bars, { "--bar": 0.5, duration: 0.11, ease: "power2.in" }, 0.87)
+      .to(bars, { "--bar": 0.5, duration: 0.08, ease: "power2.in" }, 0.9)
       .set(view, { desk: 0 }, 0.98)
       .to({}, { duration: 0.02 }, 0.98);
 
@@ -130,9 +144,9 @@ export const setupChoreography = ({ setActive, reduced }: { setActive: (index: n
       defaults: { ease: "none" },
       scrollTrigger: { trigger: "#profile", start: "top top", end: "bottom bottom", scrub: true },
     })
-      .fromTo(".about__top, .about__bottom", { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.07, stagger: 0.02, ease: "power2.out", immediateRender: true }, 0.66)
-      .to(".about__top, .about__bottom", { autoAlpha: 0, y: -16, duration: 0.05 }, 0.86)
-      .to({}, { duration: 0.09 }, 0.91);
+      .fromTo(".about__top, .about__bottom", { autoAlpha: 0, y: reduced ? 0 : 12 }, { autoAlpha: 1, y: 0, duration: 0.04, stagger: 0.02, ease: "power2.out", immediateRender: true }, 0.64)
+      .to(".about__top, .about__bottom", { autoAlpha: 0, y: reduced ? 0 : -12, duration: 0.04 }, 0.88)
+      .to({}, { duration: 0.08 }, 0.92);
 
     // Raise the shared DOM character above the white bars only while the
     // profile shot is pinned and before the desk cut.

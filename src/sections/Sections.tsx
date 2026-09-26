@@ -10,6 +10,13 @@ import { LiquidEdge } from "../components/LiquidEdge";
 import { SectionTitle } from "../components/SectionTitle";
 import { StrokeText } from "../components/StrokeText";
 import { Stage, view } from "../gl/Stage";
+import { isReduced, onMotionChange } from "../lib/motion";
+
+const useReducedMotion = () => {
+  const [reduced, setReduced] = useState(isReduced);
+  useEffect(() => onMotionChange(setReduced), []);
+  return reduced;
+};
 
 const useNarrow = (query = "(max-width: 700px)") => {
   const [narrow, setNarrow] = useState(() => window.matchMedia(query).matches);
@@ -25,23 +32,23 @@ const useNarrow = (query = "(max-width: 700px)") => {
 export function Hero({ revealed }: { revealed: boolean }) {
   // On a phone the name stacks one word per line, so it can stay big.
   const narrow = useNarrow();
+  const reduced = useReducedMotion();
   const name = narrow ? content.name.split(" ").join("\n") : content.name;
   // The CSS fade-ins only run once, for the reveal; after that the scroll
   // drives these elements, and a transition would make them trail it.
   const [settled, setSettled] = useState(false);
   useEffect(() => {
     if (!revealed) return;
-    const id = window.setTimeout(() => setSettled(true), 2400);
+    const id = window.setTimeout(() => setSettled(true), reduced ? 0 : 1800);
     return () => window.clearTimeout(id);
-  }, [revealed]);
+  }, [revealed, reduced]);
   return (
     <section id="opening" className={`hero ${settled ? "is-settled" : ""}`} aria-label={SECTIONS[0].label}>
       <div className="hero__sticky">
-      <div className="hero__scrim" aria-hidden="true" />
       <div className={`hero__title ${revealed ? "is-in" : ""}`}>
-        <StrokeText key={name} as="h1" text={name} size="clamp(4rem, 12vw, 12rem)" weight={13} play={revealed} speed={1300} pace={0.42} />
+        <StrokeText key={`${name}-${reduced}`} as="h1" text={name} size="clamp(4rem, 12vw, 12rem)" weight={13} play={revealed} speed={1300} pace={0.42} />
         <div className="hero__sub">
-          <StrokeText text={content.nameJp} size="clamp(2rem, 4.6vw, 4.2rem)" ink="var(--indigo)" weight={10} play={revealed} delay={0.55} speed={1400} pace={0.45} />
+          <StrokeText key={`jp-${reduced}`} text={content.nameJp} size="clamp(2rem, 4.6vw, 4.2rem)" ink="var(--indigo)" weight={10} play={revealed} delay={1.2} speed={800} pace={0.7} />
           <p className="hero__role">
             <span>{content.role}</span>
             <span>Portfolio {content.year}, {content.location}</span>
@@ -66,6 +73,7 @@ export function Hero({ revealed }: { revealed: boolean }) {
  * The shared CharacterCutout rises above the bars during this pinned shot.
  */
 export function About() {
+  const reduced = useReducedMotion();
   const [play, setPlay] = useState(false);
   const ref = useRef<HTMLElement>(null);
   const flat = useRef<HTMLDivElement>(null);
@@ -73,8 +81,9 @@ export function About() {
   useEffect(() => {
     const trigger = ScrollTrigger.create({
       trigger: ref.current,
-      start: "top+=38% top",
-      onEnter: () => setPlay(true),
+      start: "top top",
+      end: "bottom bottom",
+      onUpdate: (self) => { if (self.progress >= 0.64) setPlay(true); },
     });
     const tick = () => {
       flat.current!.style.opacity = String(view.flat);
@@ -84,27 +93,28 @@ export function About() {
   }, []);
 
   const { about } = content;
-  const facts = [...about.stats.map((s) => `${s.value} ${s.label}`), about.status].join("  ·  ");
   return (
     <section ref={ref} id="profile" className="about" aria-label={SECTIONS[1].label}>
       <div className="about__sticky">
         <div ref={flat} className="about__flat" aria-hidden="true" />
+        <div className="about__window-shadow" aria-hidden="true"><i /><i /><i /></div>
         <FluidBars
           className="fluid--profile"
           top={
             <div className="about__top">
               <div className="about__tilt">
                 <p className="about__eyebrow">Profile</p>
-                <StrokeText as="h2" text={about.heading} size="clamp(2.4rem, 5.4vw, 4.8rem)" ink="var(--indigo)" play={play} weight={11} outline={10} />
+                <StrokeText key={`profile-${reduced}`} as="h2" text={about.heading} size="clamp(1.8rem, 4.8vw, 4.5rem)" ink="var(--indigo)" play={play || reduced} weight={11} outline={10} />
+                <p className="about__lead"><span>{about.lead}</span></p>
               </div>
             </div>
           }
           bottom={
             <div className="about__bottom">
               <div className="about__tilt">
-                <p className="about__lead">{about.lead}</p>
                 <p className="about__body">{about.body[0]}</p>
-                <p className="about__facts">{facts}</p>
+                <ul className="about__facts">{about.stats.map((stat) => <li key={stat.label}><strong>{stat.value}</strong> {stat.label}</li>)}</ul>
+                <p className="about__status">{about.status}</p>
               </div>
             </div>
           }
