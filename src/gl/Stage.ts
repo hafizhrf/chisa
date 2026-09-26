@@ -46,6 +46,12 @@ export const view = {
   props: 1,
   /** Outro colour grade. */
   dusk: 0,
+  /** Select the two-layer sky and railing shot for Contact. */
+  contactShot: 0,
+  /** Brief focus pull on the Contact cut-out, in CSS pixels. */
+  contactBlur: 0,
+  /** Additional close-up that settles before the Contact bloom. */
+  contactPush: 1,
   particles: 1,
   /** Handheld camera amount (drift and micro-shake). */
   handheld: 1,
@@ -161,6 +167,8 @@ const loadImage = (src: string) =>
 /** Loads the art and computes where every layer sits each frame. Knows nothing about drawing. */
 class SceneModel {
   scene?: HTMLImageElement;
+  contactSky?: HTMLImageElement;
+  contactSubject?: HTMLImageElement;
   desk?: HTMLImageElement;
   deskSleep?: HTMLImageElement;
   layers: Layer[] = [];
@@ -193,6 +201,10 @@ class SceneModel {
       };
     });
     this.scene = scene;
+    [this.contactSky, this.contactSubject] = await Promise.all([
+      loadImage(plate("contact-sky")),
+      loadImage("/sprites/contact-character-rail.png"),
+    ]);
     // The desk plate isn't needed until the second section.
     loadImage(plate("desk-topdown")).then((image) => { this.desk = image; }).catch(() => undefined);
     loadImage(plate("desk-sleep")).then((image) => { this.deskSleep = image; }).catch(() => undefined);
@@ -235,10 +247,25 @@ class SceneModel {
     });
 
     const items: Item[] = [];
+    const contact = view.contactShot > 0.5 && this.contactSky && this.contactSubject;
     if (this.scene) {
-      const p = place(0, 0, 0.12);
+      const depth = contact ? 0.04 : 0.12;
+      const p = place(0, 0, depth);
+      if (contact) {
+        // The distant sky slides across the dolly, while the subject stays centred.
+        p.x += (zoom - 1) * 120 + (pointer.x * 18 + Math.sin(t * 0.12) * 18) * para;
+        p.y -= (zoom - 1) * 55;
+      }
       // A touch larger than the frame so parallax never shows an edge.
-      items.push({ key: "plate:scene", kind: "plate", image: this.scene, x: p.x, y: p.y, sx: FRAME.w * zd(0.12) * 1.04, sy: FRAME.h * zd(0.12) * 1.04, rot: 0, opacity: view.scene, flip: 1 });
+      items.push({ key: "plate:scene", kind: "plate", image: contact ? this.contactSky! : this.scene, x: p.x, y: p.y, sx: FRAME.w * zd(depth) * (contact ? 1.1 : 1.04), sy: FRAME.h * zd(depth) * (contact ? 1.1 : 1.04), rot: 0, opacity: view.scene, flip: 1 });
+    }
+    if (contact) {
+      const p = place(0, 0, 0.45);
+      const push = reduced ? 1 : view.contactPush;
+      // Anchor the close-up around her hands on the rail, rather than the frame centre.
+      p.x *= push;
+      p.y = p.y * push + 250 * (push - 1);
+      items.push({ key: "contact-subject", kind: "character", image: this.contactSubject!, x: p.x, y: p.y, sx: FRAME.w * zd(0.45) * push, sy: FRAME.h * zd(0.45) * push, rot: 0, opacity: Math.min(view.character, view.scene), flip: 1 });
     }
     if (this.desk) {
       const aspect = this.desk.naturalWidth / this.desk.naturalHeight;
@@ -257,6 +284,7 @@ class SceneModel {
     }
 
     for (const layer of this.layers) {
+      if (contact) continue;
       const { info, kind, seed, home } = layer;
       const floatAmt = reduced ? 0 : info.float;
       const mobile = MOBILE_PROPS[layer.key];
@@ -331,23 +359,45 @@ interface Backend {
 
 class GLBackend implements Backend {
   private renderer: THREE.WebGLRenderer;
+  private petalRenderer: THREE.WebGLRenderer;
+  private petalScene = new THREE.Scene();
+  private frontPetals: THREE.Mesh;
   private scene = new THREE.Scene();
   private camera = new THREE.OrthographicCamera(-1, 1, 1, -1, -10, 10);
   private plane = new THREE.PlaneGeometry(1, 1);
   private meshes = new Map<string, { mesh: THREE.Mesh; material: SpriteMaterial }>();
-  private particles = createParticles(window.innerWidth < 768 ? 22 : 42);
+  private particles = [
+    { ...createParticles(window.innerWidth < 768 ? 9 : 17), depth: "back" as const },
+    { ...createParticles(window.innerWidth < 768 ? 13 : 25), depth: "front" as const },
+  ];
 
   constructor(canvas: HTMLCanvasElement) {
     // Throws when the browser can't give us a WebGL context; the Stage falls back.
     this.renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false, premultipliedAlpha: true, powerPreference: "high-performance" });
     this.renderer.setClearColor(0x000000, 0);
-    this.particles.mesh.renderOrder = 1000;
-    this.scene.add(this.particles.mesh);
+    this.particles.forEach(({ mesh, depth }) => {
+      mesh.renderOrder = depth === "front" ? 1000 : 0.5;
+      this.scene.add(mesh);
+    });
+    // The opening character is a DOM cut-out, so a foreground pass must sit
+    // above that element rather than inside the background canvas's stacking context.
+    const front = this.particles.find((p) => p.depth === "front")!;
+    this.frontPetals = new THREE.Mesh(front.mesh.geometry, front.material);
+    this.frontPetals.frustumCulled = false;
+    this.petalScene.add(this.frontPetals);
+    const petalCanvas = document.createElement("canvas");
+    petalCanvas.className = "foreground-petals";
+    petalCanvas.setAttribute("aria-hidden", "true");
+    document.body.appendChild(petalCanvas);
+    this.petalRenderer = new THREE.WebGLRenderer({ canvas: petalCanvas, alpha: true, antialias: false, premultipliedAlpha: true });
+    this.petalRenderer.setClearColor(0x000000, 0);
   }
 
   resize(w: number, h: number) {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, w < 768 ? 1.5 : 1.75));
     this.renderer.setSize(w, h, false);
+    this.petalRenderer.setPixelRatio(Math.min(window.devicePixelRatio, w < 768 ? 1.5 : 1.75));
+    this.petalRenderer.setSize(w, h, false);
   }
 
   private meshFor(item: Item, order: number) {
@@ -368,6 +418,13 @@ class GLBackend implements Backend {
       entry = { mesh, material };
       this.meshes.set(item.key, entry);
     }
+    // The shared plate keeps its registration for bloom and camera tracking;
+    // only its texture changes when Contact takes over.
+    const texture = entry.material.uniforms.map.value as THREE.Texture;
+    if (texture && texture.image !== item.image) {
+      texture.image = item.image;
+      texture.needsUpdate = true;
+    }
     entry.mesh.renderOrder = order;
     return entry;
   }
@@ -383,6 +440,7 @@ class GLBackend implements Backend {
     this.camera.rotation.z = cam.rot;
     this.camera.updateMatrixWorld();
 
+    this.meshes.forEach(({ mesh }) => { mesh.visible = false; });
     frame.items.forEach((item, index) => {
       const { mesh, material } = this.meshFor(item, index);
       mesh.visible = item.opacity > 0.001;
@@ -397,31 +455,48 @@ class GLBackend implements Backend {
       u.uCam.value.set(cam.x, cam.y);
       u.uHalf.value.set(half.w, half.h);
       u.uSize.value.set(item.sx, item.sy);
-      u.uCA.value = frame.ca;
+      u.uCA.value = view.contactShot > 0.5 ? frame.ca * 0.16 : frame.ca;
+      u.uBlur.value = item.key === "contact-subject" && !frame.reduced ? view.contactBlur * half.w * 2 / window.innerWidth : 0;
       u.uLight.value.set(light.x, light.y);
       u.uLightRadius.value = light.radius;
       u.uLight1.value = light.strength * (item.kind === "character" ? view.charLight : 1);
       u.uGradeMix.value = frame.dusk;
     });
 
-    const pm = this.particles.material;
-    pm.uniforms.uTime.value = frame.time;
-    pm.uniforms.uView.value.set(half.w * 2, half.h * 2);
-    pm.uniforms.uCenter.value.set(cam.x, cam.y);
-    pm.uniforms.uSize.value = Math.min(half.w, half.h) * 0.035;
-    pm.uniforms.uLight.value.set(light.x, light.y);
-    pm.uniforms.uLightRadius.value = light.radius;
-    pm.uniforms.uLight1.value = light.strength;
+    const mobilePetals = window.innerWidth < 768;
     // Petals belong to the room; they never drift over the white pages.
     const petals = view.particles * (frame.items.find((i) => i.key === "plate:scene")?.opacity ?? 0);
-    pm.uniforms.uOpacity.value = petals;
-    this.particles.mesh.visible = !frame.reduced && petals > 0.001;
+    const plateOrder = frame.items.findIndex((i) => i.key === "plate:scene");
+    this.particles.forEach(({ material: pm, mesh, depth }) => {
+      const back = depth === "back";
+      // Draw distant petals above the sky but beneath all cut-outs. Near petals
+      // cross the character, with larger silhouettes and a faster draft.
+      mesh.renderOrder = back ? plateOrder + 0.5 : 1000;
+      pm.uniforms.uTime.value = frame.time * (back ? 0.65 : 1);
+      pm.uniforms.uView.value.set(half.w * 2, half.h * 2);
+      pm.uniforms.uCenter.value.set(cam.x - pointer.x * (back ? 5 : 28), cam.y + pointer.y * (back ? 3 : 18));
+      pm.uniforms.uSize.value = Math.min(half.w, half.h) * (mobilePetals ? 0.065 : 0.035) * (back ? 0.6 : 1);
+      pm.uniforms.uNearSize.value = !back && mobilePetals ? 0.7 : 0;
+      pm.uniforms.uLight.value.set(light.x, light.y);
+      pm.uniforms.uLightRadius.value = light.radius;
+      pm.uniforms.uLight1.value = light.strength;
+      pm.uniforms.uOpacity.value = petals * (back ? 0.7 : 1);
+      mesh.visible = back && !frame.reduced && petals > 0.001;
+    });
 
     this.renderer.render(this.scene, this.camera);
+    const opening = document.getElementById("opening")?.getBoundingClientRect();
+    const contact = document.querySelector(".contact__stage")?.getBoundingClientRect();
+    const inOpening = view.contactShot < 0.5 && opening && opening.bottom > 0 && opening.top < window.innerHeight;
+    const inContact = view.contactShot > 0.5 && contact && contact.bottom > 0 && contact.top <= 0;
+    this.frontPetals.visible = !frame.reduced && petals > 0.001 && !!(inOpening || inContact);
+    this.petalRenderer.render(this.petalScene, this.camera);
   }
 
   dispose() {
     this.renderer.dispose();
+    this.petalRenderer.dispose();
+    this.petalRenderer.domElement.remove();
   }
 }
 
@@ -470,7 +545,9 @@ class CanvasBackend implements Backend {
       ctx.rotate(item.rot);
       ctx.scale(item.sx, -item.sy);
       ctx.globalAlpha = item.opacity;
+      ctx.filter = item.key === "contact-subject" && !frame.reduced ? `blur(${view.contactBlur * dpr}px)` : "none";
       ctx.drawImage(item.image, -0.5, -0.5, 1, 1);
+      ctx.filter = "none";
     }
     ctx.globalAlpha = 1;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -581,12 +658,14 @@ export class Stage {
     if (!frame || !item) return null;
     const w = window.innerWidth, h = window.innerHeight;
     const unit = w / (frame.half.w * 2);
+    const dx = item.x - frame.cam.x, dy = item.y - frame.cam.y;
+    const c = Math.cos(frame.cam.rot), s = Math.sin(frame.cam.rot);
     return {
-      cx: w / 2 + (item.x - frame.cam.x) * unit,
-      cy: h / 2 - (item.y - frame.cam.y) * unit,
+      cx: w / 2 + (dx * c + dy * s) * unit,
+      cy: h / 2 - (-dx * s + dy * c) * unit,
       w: item.sx * unit,
       h: item.sy * unit,
-      rot: -item.rot,
+      rot: frame.cam.rot - item.rot,
     };
   }
 

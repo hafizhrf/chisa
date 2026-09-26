@@ -22,7 +22,9 @@ export interface Work {
   id: string;
   title: string;
   role: string;
-  year: string;
+  /** Short feature description shown below the comic panel. */
+  summary: string;
+  year?: string;
   /** Japanese title, a line of dialogue and a sound effect for the comic panel. */
   jp: string;
   line: string;
@@ -48,38 +50,37 @@ export interface Work {
   media:
     | { type: "image"; src: string; position?: string; zoom?: number }
     | { type: "video"; src: string; poster?: string };
-  duration: string;
+  duration?: string;
   link?: string;
+  /** Project uploads, thumbnail first; intrinsic dimensions preserve each photo's ratio. */
+  gallery?: { src: string; alt: string; width: number; height: number }[];
 }
 
 export const content = {
   name: "Kuroneko",
   nameJp: "くろねこ",
-  role: "Motion Designer / Illustrator / Creative Developer",
+  role: "Software Engineer / Full-stack Developer / AI & Automation",
   location: "Jakarta, ID",
   year: "2026",
-  email: "hello@example.com",
+  email: "hafizh@hafizhrf.me",
 
   about: {
     heading: "プロフィール",
-    lead: "Aku memadukan motion design, ilustrasi, creative coding, dan AI untuk membangun pengalaman visual yang hidup.",
-    body: [
-      "Aku mengeksplorasi prompting dan machine learning untuk ideasi serta prototipe. Website ini masih draft; bio dan karya akan diperbarui.",
-      "Aku tertarik pada cara teknologi dan cerita visual bertemu: dari eksperimen awal hingga pengalaman interaktif yang terasa personal.",
-    ],
+    lead: "I’m a software engineer focused on building full-stack platforms, mobile apps, and custom internal tools that automate the boring stuff",
+    body: ["Lately, I’ve been diving deep into integrating AI tooling into actual production workflows. Instead of just wrapping basic APIs, I like building systems that orchestrate LLM reasoning, handle real-time streaming, and handle media automation."],
     stats: [
-      { label: "Years", value: "05" },
-      { label: "Projects", value: "48" },
-      { label: "MV / Lyric", value: "16" },
+      { label: "Web & mobile", value: "Full-stack" },
+      { label: "Production workflows", value: "AI" },
+      { label: "Internal tools", value: "Automation" },
     ],
-    status: "Open for commission, Q4 2026",
+    status: "Software engineering · AI integration · Automation",
   },
 
   milestone: {
     heading: "Milestone",
     jp: "マイルストーン",
     aside: "少しずつ…！",
-    body: "Author lagi nabung biar bisa komis ke artist beneran, sekarang masih pake AI Generated image soalnya :)",
+    body: "I’m saving up to commission a real artist. The website still uses AI-generated images for now :)",
     saved: 250000,
     target: 2000000,
   },
@@ -111,26 +112,47 @@ export const content = {
           { kind: "sfx", text: "ザアッ", x: 0.2, y: 0.2, rot: -8 },
         ],
       },
-      title: "Lilac, Lyric Video",
+      title: "PocketHero",
       jp: "ライラック",
       line: "青い春が、まだ続いてる。",
       sfx: "ザアッ",
-      role: "Motion / Typography",
-      year: "2026",
-      action: "Kertas beterbangan, kamera push-in ke jendela.",
-      note: "Kinetic lyric, brush reveal per ketukan.",
-      tags: ["After Effects", "Lyric", "Kinetic"],
+      role: "AI / Money management",
+      summary: "Manage money through AI chat and voice, with a pixel-game experience.",
+      link: "https://pockethero.web.id",
+      action: "A money management app featuring a pixel-themed game. It utilizes AI and voice-assisted chat to eliminate manual typing, ensuring a seamless, hassle-free user experience.",
+      note: "",
+      tags: ["React","hono","9router","ai","mongodb"],
       panel: "/works/lilac",
       // lilac~1 is smile.jpeg, lilac~2 is side.jpeg (scripts/panels.config.json).
       variants: ["/works/lilac~1", "/works/lilac~2"],
       sequence: ["/works/lilac~2", "/works/lilac", "/works/lilac~1"],
-      media: {
-        type: "image",
-        src: "/bg/scene-still-2738.webp",
-        position: "50% 40%",
-        zoom: 1,
-      },
-      duration: "03:42",
+      media: { type: "image", src: "/uploads/1783491938197-Screenshot-2026-07-08-132506.png" },
+      gallery: [
+        {
+                "src": "/uploads/1783491938197-Screenshot-2026-07-08-132506.png",
+                "alt": "pockethero — overview",
+                "width": 1542,
+                "height": 872
+        },
+        {
+                "src": "/uploads/1783491974860-Screenshot-2026-07-08-132604.png",
+                "alt": "pockethero — screenshot 1",
+                "width": 515,
+                "height": 1002
+        },
+        {
+                "src": "/uploads/1783491974922-Screenshot-2026-07-08-132552.png",
+                "alt": "pockethero — screenshot 2",
+                "width": 508,
+                "height": 998
+        },
+        {
+                "src": "/uploads/1783491993828-Screenshot-2026-07-08-132627.png",
+                "alt": "pockethero — screenshot 3",
+                "width": 507,
+                "height": 987
+        }
+],
     },
     {
       id: "afterschool",
@@ -168,19 +190,32 @@ export const content = {
           { kind: "sfx", text: "カサッ", x: 0.3, y: 0.22, rot: 6 },
         ],
       },
-      title: "After School Reel",
+      title: "March7",
       jp: "放課後",
       line: "もう少しだけ、ここにいたい。",
       sfx: "カサッ",
-      role: "Illustration / Compositing",
-      year: "2026",
-      action: "Top-down, rambut tertiup angin, flare dari kiri atas.",
-      note: "Parallax 2.5D dari ilustrasi statis.",
-      tags: ["Illustration", "2.5D", "Compositing"],
+      role: "AI / Video automation",
+      summary: "A generative video workspace for script orchestration, visual mapping, and synchronized subtitles.",
+      action: "A local generative video workspace featuring automated script orchestration, precise word-timing alignment, and context-aware asset mapping.\n\nThis application leverages specialized LLM reasoning and streaming architectures to streamline end-to-end educational content production. Key capabilities include splitting raw scripts into structured multi-slot visual scenes, synchronizing real-time text-to-speech boundaries into precise karaoke subtitles via native canvas rendering, and utilizing a hardware-accelerated rendering pipeline equipped with automatic visual gap-filling and multi-format video layout support.",
+      note: "",
+      tags: ["python","Pydantic","MoviePyv2","FFmpeg","NVENC"],
       panel: "/works/afterschool",
       variants: ["/works/afterschool~1"],
-      media: { type: "image", src: "/bg/desk-topdown-2738.webp" },
-      duration: "00:48",
+      media: { type: "image", src: "/uploads/1783494002501-Screenshot-2026-07-08-135944.png" },
+      gallery: [
+        {
+                "src": "/uploads/1783494002501-Screenshot-2026-07-08-135944.png",
+                "alt": "march7 — overview",
+                "width": 1877,
+                "height": 827
+        },
+        {
+                "src": "/uploads/1783494005445-Screenshot-2026-07-08-135951.png",
+                "alt": "march7 — screenshot 1",
+                "width": 1853,
+                "height": 987
+        }
+],
     },
     {
       id: "curtain",
@@ -200,23 +235,38 @@ export const content = {
           { kind: "shout", text: "幕が、上がる！", x: 0.26, y: 0.42, w: 0.3 },
         ],
       },
-      title: "Curtain Call Title Sequence",
+      title: "Kekkon",
       jp: "カーテンコール",
       line: "幕が、上がる！",
       sfx: "バサッ",
-      role: "Direction / Motion",
-      year: "2025",
-      action: "Tirai tersibak, judul dilukis di tengah.",
-      note: "Light leak cut ke adegan utama.",
-      tags: ["Title Design", "Light Leak"],
+      role: "Digital invitations",
+      summary: "Free digital wedding invitations with simple guest-list management.",
+      link: "https://kekkon.web.id",
+      action: "I developed Kekkon (結婚), a 100% free digital wedding invitation platform designed to help couples create modern invitations and manage guest lists effortlessly. Built with React, Vite, and PostgreSQL, the project focuses on delivering a fast, seamless, and user-friendly experience to reduce the stress of wedding planning.",
+      note: "",
+      tags: ["react","vite","postgresql","hono"],
       panel: "/works/curtain",
-      media: {
-        type: "image",
-        src: "/bg/scene-still-2738.webp",
-        position: "90% 30%",
-        zoom: 1.8,
-      },
-      duration: "01:10",
+      media: { type: "image", src: "/uploads/1783615018875-Screenshot-2026-07-09-233654.png" },
+      gallery: [
+        {
+                "src": "/uploads/1783615018875-Screenshot-2026-07-09-233654.png",
+                "alt": "Kekkon — overview",
+                "width": 1292,
+                "height": 837
+        },
+        {
+                "src": "/uploads/1783614882096-Screenshot-2026-07-09-233357.png",
+                "alt": "Kekkon — screenshot 1",
+                "width": 2526,
+                "height": 1273
+        },
+        {
+                "src": "/uploads/1783614884998-Screenshot-2026-07-09-233416.png",
+                "alt": "Kekkon — screenshot 2",
+                "width": 2243,
+                "height": 1250
+        }
+],
     },
     {
       id: "desk",
@@ -246,23 +296,44 @@ export const content = {
           { kind: "caption", text: "光をすくって", x: 0.08, y: 0.4 },
         ],
       },
-      title: "Reflections (Short Film)",
+      title: "Kyou Oripa",
       jp: "反射",
       line: "…見えた？",
       sfx: "キラッ",
-      role: "Storyboard / Animation",
-      year: "2025",
-      action: "Pantulan di meja, fokus berpindah.",
-      note: "Rack focus + chromatic aberration.",
-      tags: ["Storyboard", "Animation"],
+      role: "Entertainment commerce",
+      summary: "Mystery-box collectible draws for the hobby community, built around transparent mechanics.",
+      link: "https://oripa.kyou.id/",
+      action: "A dedicated entertainment commerce feature built for the Kyou ecosystem, specializing in mystery-box style draws for rare collectibles. The platform prioritizes high transparency and fair-play mechanics, focusing entirely on elevating user entertainment value for the hobby community.",
+      note: "",
+      tags: ["react","vite","css","webgl"],
       panel: "/works/desk",
-      media: {
-        type: "image",
-        src: "/bg/scene-still-2738.webp",
-        position: "50% 92%",
-        zoom: 2,
-      },
-      duration: "02:05",
+      media: { type: "image", src: "/uploads/1783496950817-Screenshot-2026-07-08-144903.png" },
+      gallery: [
+        {
+                "src": "/uploads/1783496950817-Screenshot-2026-07-08-144903.png",
+                "alt": "kyou oripa — overview",
+                "width": 1872,
+                "height": 982
+        },
+        {
+                "src": "/uploads/1783496957049-Screenshot-2026-07-08-144637.png",
+                "alt": "kyou oripa — screenshot 1",
+                "width": 1327,
+                "height": 963
+        },
+        {
+                "src": "/uploads/1783496957222-Screenshot-2026-07-08-144626.png",
+                "alt": "kyou oripa — screenshot 2",
+                "width": 970,
+                "height": 960
+        },
+        {
+                "src": "/uploads/1783496957533-Screenshot-2026-07-08-144541.png",
+                "alt": "kyou oripa — screenshot 3",
+                "width": 1871,
+                "height": 982
+        }
+],
     },
     {
       id: "sky",
@@ -284,23 +355,26 @@ export const content = {
           { kind: "box", text: "空、きれい。", x: 0.25, y: 0.45, w: 0.3 },
         ],
       },
-      title: "Blue Hour Visualizer",
+      title: "Partner Kyou",
       jp: "ブルーアワー",
       line: "空、きれい。",
       sfx: "ふわっ",
-      role: "WebGL / Creative Code",
-      year: "2025",
-      action: "Awan bergerak, partikel kelopak.",
-      note: "Realtime, audio-reactive build.",
-      tags: ["WebGL", "Three.js", "Shader"],
+      role: "B2B / Wholesale",
+      summary: "A B2B wholesale platform that helps partners build hobby stores without upfront inventory.",
+      link: "https://partner.kyou.id",
+      action: "A dedicated B2B wholesale platform designed to eliminate upfront inventory barriers for aspiring hobby shop owners in Indonesia. Operating since 2019, this program bypasses traditional affiliate or consignment structures, offering a direct wholesale pipeline and infrastructure to help partners scale verified, independent hobby storefronts with zero initial capital.",
+      note: "",
+      tags: ["react","vite","tailwind","golang"],
       panel: "/works/sky",
-      media: {
-        type: "image",
-        src: "/bg/scene-still-2738.webp",
-        position: "75% 45%",
-        zoom: 2.2,
-      },
-      duration: "∞",
+      media: { type: "image", src: "/uploads/1783497086905-Screenshot-2026-07-08-144434.png" },
+      gallery: [
+        {
+                "src": "/uploads/1783497086905-Screenshot-2026-07-08-144434.png",
+                "alt": "partner kyou.id — overview",
+                "width": 1882,
+                "height": 977
+        }
+],
     },
     {
       id: "pages",
@@ -326,80 +400,110 @@ export const content = {
           },
         ],
       },
-      title: "Loose Pages Key Visual",
+      title: "Mbizmarket",
       jp: "ページ",
       line: "めくれて、飛んでいく。",
       sfx: "パラパラ",
-      role: "Illustration",
-      year: "2024",
-      action: "Buku terbuka, halaman lepas.",
-      note: "KV + turunan motion 6 detik.",
-      tags: ["Key Visual", "Print"],
+      role: "B2B / E-procurement",
+      summary: "A B2B marketplace for procurement, transactions, and digital invoicing.",
+      link: "https://www.mbizmarket.co.id/",
+      action: "Mbizmarket, a B2B (business-to-business) marketplace, is ready to answer the needs of goods / services for small entrepreneurs, large corporate and government in Indonesia. Not only for buying and selling marketplace, Mbizmarket provides the most complete business solutions to simplify all business activities. Transaction process, digital invoicing, taxes, promotions, e-procurement, capital loans, all solutions can be accessed in one application.",
+      note: "",
+      tags: ["TypeScript","flutter","react","tailwind","php"],
       panel: "/works/pages",
       variants: ["/works/pages~1"],
-      media: {
-        type: "image",
-        src: "/bg/desk-topdown-2738.webp",
-        position: "25% 55%",
-        zoom: 1.6,
-      },
-      duration: "00:06",
+      media: { type: "image", src: "/uploads/1783492288947-Screenshot-2026-07-08-133121.png" },
+      gallery: [
+        {
+                "src": "/uploads/1783492288947-Screenshot-2026-07-08-133121.png",
+                "alt": "mbizmarket.co.id — overview",
+                "width": 1542,
+                "height": 793
+        },
+        {
+                "src": "/uploads/1783492356286-unnamed-1-.webp",
+                "alt": "mbizmarket.co.id — screenshot 1",
+                "width": 560,
+                "height": 960
+        },
+        {
+                "src": "/uploads/1783492356385-unnamed.webp",
+                "alt": "mbizmarket.co.id — screenshot 2",
+                "width": 560,
+                "height": 960
+        },
+        {
+                "src": "/uploads/1783492356565-Screenshot-2026-07-08-133151.png",
+                "alt": "mbizmarket.co.id — screenshot 3",
+                "width": 1667,
+                "height": 980
+        },
+        {
+                "src": "/uploads/1783492356820-Screenshot-2026-07-08-133121.png",
+                "alt": "mbizmarket.co.id — screenshot 4",
+                "width": 1542,
+                "height": 793
+        }
+],
     },
   ] satisfies Work[],
 
   skills: [
     {
-      word: "MOTION",
-      jp: "モーション",
-      note: "After Effects · Premiere · Cavalry",
+      word: "ARTIFICIAL\nINTELLIGENCE",
+      jp: "人工知能",
+      note: "Prompt engineering · RAG · Agentic tooling",
       variant: "slam",
     },
     {
-      word: "ILLUSTRATION",
-      jp: "イラスト",
-      note: "Clip Studio · Procreate · Photoshop",
+      word: "DESIGN",
+      jp: "デザイン",
+      note: "Figma · UI systems · Prototyping",
       variant: "wipe",
     },
     {
-      word: "TYPOGRAPHY",
-      jp: "タイポグラフィ",
-      note: "Kinetic type · Lyric video · Title design",
+      word: "INTEGRATION",
+      jp: "連携",
+      note: "Workflow · GraphQL · Automation pipeline",
       variant: "rise",
     },
     {
       word: "CODE",
       jp: "コード",
-      note: "React · Three.js · GLSL · GSAP",
+      note: "TypeScript · React · Flutter · Hono",
       variant: "type",
     },
   ] as const,
 
   arsenal: [
-    "After Effects",
-    "Premiere Pro",
-    "Cinema 4D",
-    "Blender",
-    "Clip Studio Paint",
-    "Photoshop",
-    "Illustrator",
-    "Figma",
-    "TouchDesigner",
-    "Three.js",
-    "GLSL",
-    "GSAP",
-    "React",
-    "TypeScript",
-  ],
+    "typescript",
+    "flutter",
+    "react",
+    "tailwind",
+    "laravel",
+    "express.js",
+    "sql",
+    "hono",
+    "mongodb",
+    "cloudflare",
+    "figma",
+    "hermes",
+    "dify.ai",
+    "rag",
+    "workflow",
+    "agentic tooling",
+    "git",
+    "prompt engineering",
+    "State Management",
+    "graphql",
+    "docker",
+    "automation pipeline"
+],
 
   socials: [
-    { label: "X / Twitter", href: "https://x.com/" },
-    { label: "Instagram", href: "https://instagram.com/" },
-    { label: "YouTube", href: "https://youtube.com/" },
-    { label: "Behance", href: "https://behance.net/" },
-    { label: "GitHub", href: "https://github.com/" },
+    { label: "GitHub", href: "https://github.com/hafizhrf" },
+    { label: "LinkedIn", href: "https://www.linkedin.com/in/pizhhh/" },
   ],
-
-  credits: "Website draft, Bantu hapis komis artist beneran",
 };
 
 export const SECTIONS = [

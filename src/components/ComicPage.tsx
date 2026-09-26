@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { content, type Work } from "../content";
 import page from "../comicPage.json";
 import { ENTRY, buildScript, deriveStops, poseAt, segmentAt, takeIndex, type Segment, type Stop, type StopDef } from "../lib/comicCamera";
-import { boxStyle, type Layout } from "../lib/comicLayout";
+import { bbox, boxStyle, type Layout } from "../lib/comicLayout";
 import { isReduced } from "../lib/motion";
 import { SectionTitle } from "./SectionTitle";
 import { WorkCard } from "./WorkCard";
@@ -50,6 +50,10 @@ export function ComicPage({ onOpen }: { onOpen: (work: Work) => void }) {
     const el = root.current!;
     const section = el.closest("section")!;
     const pg = pageEl.current!;
+    const captions = portrait ? layout.panels.flatMap(panel => {
+      const el = pg.querySelector<HTMLElement>(`[data-caption="${panel.id}"]`);
+      return el ? [{ el, bounds: bbox(panel.poly), poly: panel.poly }] : [];
+    }) : [];
     const veil = el.querySelector<HTMLElement>(".comic__veil")!;
     const { segments, total } = script;
     const holdOf = (i: number) => segments.find((s) => s.type === "hold" && s.stop === i)!;
@@ -114,6 +118,31 @@ export function ComicPage({ onOpen }: { onOpen: (work: Work) => void }) {
       const s = w / pose.span / k0();
       const rx = reduced ? 0 : pose.rotX, rz = reduced ? 0 : pose.rotZ;
       pg.style.transform = `translate3d(${w / 2}px, ${h / 2}px, 0) rotateX(${rx}deg) rotateZ(${rz}deg) scale(${s}) translate3d(${-(pose.cx + sway) * k0()}px, ${-pose.cy * k0()}px, 0)`;
+      // Keep phone titles in the white gutter beneath each panel, following
+      // its slanted edge while the camera pans across the strip.
+      if (portrait) {
+        const gutter = pose.span * 16 / w;
+        const visibleLeft = pose.cx - pose.span / 2 + gutter;
+        const visibleRight = pose.cx + pose.span / 2 - gutter;
+        pg.style.setProperty("--caption-title-size", `${Math.min(13 / s, 24 * k0())}px`);
+        captions.forEach(({ el, bounds, poly }) => {
+          const left = Math.max(bounds.x, visibleLeft);
+          const right = Math.min(bounds.x + bounds.w, visibleRight);
+          if (right <= left) return;
+          el.style.left = `${left * k0()}px`;
+          el.style.right = "auto";
+          el.style.width = `${(right - left) * k0()}px`;
+          const bottomAt = (x: number) => Math.max(...poly.flatMap(([ax, ay], i) => {
+            const [bx, by] = poly[(i + 1) % poly.length];
+            if (ax === bx || x < Math.min(ax, bx) || x > Math.max(ax, bx)) return [];
+            return [ay + (by - ay) * (x - ax) / (bx - ax)];
+          }));
+          // The next row starts 30 page units below this edge.
+          const floor = bottomAt(left);
+          el.style.top = `${(floor + 15) * k0()}px`;
+          el.style.rotate = `${Math.atan2(bottomAt(right) - floor, right - left) * 180 / Math.PI}deg`;
+        });
+      }
 
       // Which stop the camera has reached (lettering pops in once it lands), and each panel's take.
       const at = seg.type === "hold" ? seg.stop : seg.stop - 1;
@@ -145,8 +174,10 @@ export function ComicPage({ onOpen }: { onOpen: (work: Work) => void }) {
     return () => {
       gsap.ticker.remove(tick);
       trigger.kill();
-      ScrollTrigger.removeEventListener("refreshInit", size);
-      section.style.height = "";
+        ScrollTrigger.removeEventListener("refreshInit", size);
+        section.style.height = "";
+        captions.forEach(({ el }) => { el.style.left = ""; el.style.right = ""; el.style.width = ""; el.style.top = ""; el.style.rotate = ""; });
+        pg.style.removeProperty("--caption-title-size");
     };
 
   }, [script, stops, portrait]);
@@ -174,6 +205,9 @@ export function ComicPage({ onOpen }: { onOpen: (work: Work) => void }) {
               </div>
             );
           })}
+          {portrait ? content.works.map(work => (
+            <p key={`caption-${work.id}`} data-caption={work.id} className="comic__gutter-title">{work.title}</p>
+          )) : null}
           <svg className="comic-page__borders" viewBox={`0 0 ${pw} ${ph}`} preserveAspectRatio="none" aria-hidden="true">
             {layout.panels.filter((p) => p.id !== "title").map((p) => (
               <polygon key={p.id} points={p.poly.map((q) => q.join(",")).join(" ")} />

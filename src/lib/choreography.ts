@@ -39,6 +39,7 @@ export const setupChoreography = ({ setActive, reduced }: { setActive: (index: n
       scrollTrigger: { trigger: "#opening", start: "top top", end: "bottom bottom", scrub: true },
     })
       .fromTo(view, { zoom: 1, lift: 0 }, { zoom: reduced ? 1 : 1.22, lift: reduced ? 0 : 1, duration: 1, ease: "power1.in", immediateRender: false }, 0)
+      .fromTo(view, { particles: 1 }, { particles: 0, duration: 0.65, ease: "power1.out", immediateRender: false }, 0)
       .fromTo(".stage canvas", { filter: "blur(0px)" }, { filter: reduced ? "blur(0px)" : "blur(1.5px)", duration: 1, ease: "power1.in", immediateRender: false }, 0)
       // The lens fringe clears before the profile pin so the same DOM
       // character stays visually aligned as the room moves behind her.
@@ -135,7 +136,7 @@ export const setupChoreography = ({ setActive, reduced }: { setActive: (index: n
       defaults: { ease: "none" },
       scrollTrigger: { trigger: "#contact", start: "top bottom", end: "bottom bottom", scrub: reduced ? true : 0.6 },
     })
-      .fromTo(view, { scene: 0, character: 0, curtains: 0, props: 0, charLight: 0 }, { scene: 1, character: 1, curtains: 1, props: 1, charLight: 1, duration: 0.01, immediateRender: false }, 0)
+      .fromTo(view, { contactShot: 0, contactPush: 1, particles: 0, scene: 0, character: 0, curtains: 0, props: 0, charLight: 0 }, { contactShot: 1, contactPush: reduced ? 1 : 1.32, particles: 0, scene: 1, character: 1, curtains: 1, props: 1, charLight: 1, duration: 0.01, immediateRender: false }, 0)
       .fromTo(view, { zoom: reduced ? 1 : 1.45, focusX: 10, focusY: -30, lift: reduced ? 0 : 1, dusk: 0, ca: 0.18 },
         { zoom: 1, focusX: 0, focusY: 0, lift: 0, dusk: 1, ca: 0.5, duration: 1, ease: "power2.out", immediateRender: false }, 0);
 
@@ -157,33 +158,37 @@ export const setupChoreography = ({ setActive, reduced }: { setActive: (index: n
     };
     gsap.ticker.add(syncPopout);
 
-    // The white bars part on the dusk room once the contact shot is pinned; as
-    // they open, light leaks in off the left edge and a streak crosses the room.
+    // Original optical flow: brief real-time flare as the bars open, then bloom settles.
     let leaked = false;
+    const contactFlash = gsap.timeline({ paused: true })
+      .fromTo(".contact__edge", { autoAlpha: 0, xPercent: -18 }, { autoAlpha: 0.55, xPercent: 0, duration: 0.17, ease: "power2.out" }, 0)
+      .to(".contact__edge", { autoAlpha: 0, duration: 0.12, ease: "power1.in" })
+      .fromTo(".contact__streak", { autoAlpha: 0, scaleX: 0.3, xPercent: -8 }, { autoAlpha: 0.8, scaleX: 1.05, xPercent: 0, duration: 0.32, ease: "power2.out" }, 0)
+      .to(".contact__streak", { autoAlpha: 0, scaleX: 1.4, xPercent: 6, duration: 0.6, ease: "power1.in" }, 0.32);
     gsap.timeline({
       scrollTrigger: {
-        trigger: "#contact",
-        start: "top top",
-        end: "top -40%",
-        scrub: reduced ? true : 0.5,
-        onUpdate: (self) => {
-          const open = self.progress > 0.35;
-          if (open && !leaked && self.direction > 0 && !reduced) {
-            gsap.timeline()
-              .fromTo(".contact__edge", { autoAlpha: 0, xPercent: -18 }, { autoAlpha: 1, xPercent: 0, duration: 0.17, ease: "power2.out" }, 0)
-              .to(".contact__edge", { autoAlpha: 0, duration: 0.12, ease: "power1.in" })
-              .fromTo(".contact__streak", { autoAlpha: 0, scaleX: 0.3, xPercent: -8 }, { autoAlpha: 0.9, scaleX: 1.05, xPercent: 0, duration: 0.32, ease: "power2.out" }, 0)
-              .to(".contact__streak", { autoAlpha: 0, scaleX: 1.4, xPercent: 6, duration: 0.6, ease: "power1.in" }, 0.32);
+        trigger: "#contact", start: "top top", end: "top -40%", scrub: reduced ? true : 0.5,
+        onUpdate: self => {
+          if (!reduced && !leaked && self.direction > 0 && self.progress > 0.35) {
+            leaked = true;
+            contactFlash.restart();
           }
-          leaked = open;
+        },
+        onLeaveBack: () => {
+          leaked = false;
+          contactFlash.pause(0);
+          gsap.set([".contact__edge", ".contact__streak"], { autoAlpha: 0 });
         },
       },
     })
       .fromTo(".fluid--contact", { "--bar": 0.5 }, { "--bar": 0, ease: "power2.inOut", immediateRender: false }, 0)
-      // Bloom: the room's light blooms as the frame opens, peaks, and settles to a soft glow.
-      .fromTo(".contact__bloom", { opacity: 0 }, { opacity: 1, duration: 0.45, ease: "power2.in", immediateRender: false }, 0.2)
-      .to(".contact__bloom", { opacity: reduced ? 0 : 0.4, duration: 0.35, ease: "power2.out" }, 0.65)
-      .fromTo(".contact__bloom-wash", { opacity: 0 }, { keyframes: { opacity: [0, 0.75, 0] }, duration: 0.6, ease: "none", immediateRender: false }, 0.3);
+      .fromTo(view, { particles: 0 }, { particles: 1, duration: 0.25, ease: "power1.out", immediateRender: false }, 0.15)
+      .fromTo(view, { contactPush: reduced ? 1 : 1.32 }, { contactPush: 1, duration: 0.2, ease: "power3.out", immediateRender: false }, 0)
+      .fromTo(view, { contactBlur: 0 }, { contactBlur: reduced ? 0 : 6, duration: 0.14, ease: "power1.inOut", immediateRender: false }, 0.03)
+      .to(view, { contactBlur: 0, duration: 0.08, ease: "power1.out" }, 0.17)
+      .fromTo(".contact__bloom", { opacity: 0 }, { opacity: reduced ? 0 : 0.8, duration: 0.45, ease: "power2.in", immediateRender: false }, 0.2)
+      .to(".contact__bloom", { opacity: reduced ? 0 : 0.3, duration: 0.35, ease: "power2.out" }, 0.65)
+      .fromTo(".contact__shade", { opacity: 0 }, { opacity: 0.13, duration: 0.35, ease: "power2.out", immediateRender: false }, 0.65);
 
     // As the form sheet rises over the dusk shot, the title panels step back out of its way.
     gsap.timeline({ scrollTrigger: { trigger: ".contact__sheet", start: "top bottom", end: "top 45%", scrub: true } })

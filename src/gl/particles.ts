@@ -12,6 +12,7 @@ const vertex = /* glsl */ `
   uniform vec2 uView;     // visible area, world units
   uniform vec2 uCenter;
   uniform float uSize;
+  uniform float uNearSize;
   uniform vec2 uLight;
   uniform float uLightRadius;
   varying vec2 vUv;
@@ -33,7 +34,8 @@ const vertex = /* glsl */ `
     // Flutter: the flake turns about its long axis, so it thins and flips.
     float flip = cos(t * (2.0 + aSeed.w * 3.0) + aSeed.x * 6.28);
     vFlip = flip;
-    vec2 local = position.xy * uSize * (0.55 + aSeed.z * 0.8);
+    // A few foreground petals are larger; preserve the original desktop sizes.
+    vec2 local = position.xy * uSize * (0.55 + aSeed.z * 0.8 + pow(aSeed.z, 3.0) * uNearSize);
     local.x *= 0.25 + 0.75 * abs(flip);
     vec2 rotated = vec2(cos(angle) * local.x - sin(angle) * local.y, sin(angle) * local.x + cos(angle) * local.y);
     vec2 world = pos + rotated;
@@ -113,6 +115,7 @@ export const createParticles = (count: number) => {
       uView: { value: new THREE.Vector2(1000, 600) },
       uCenter: { value: new THREE.Vector2() },
       uSize: { value: 28 },
+      uNearSize: { value: 0 },
       uOpacity: { value: 1 },
       uLight: { value: new THREE.Vector2() },
       uLightRadius: { value: 500 },

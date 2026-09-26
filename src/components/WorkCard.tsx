@@ -93,10 +93,10 @@ export function WorkCard({ work, onOpen, style, take = 0, revealed = true, portr
           )}
         </div>
       ))}
-      <p className="board__caption">
+      {!portrait ? <p className="board__caption">
         <span className="board__title">{work.title}</span>
-        <span className="board__meta">{work.role}, {work.year}</span>
-      </p>
+        <span className="board__meta">{work.summary}</span>
+      </p> : null}
     </article>
   );
 }

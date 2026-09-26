@@ -1,8 +1,8 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { view } from "../gl/Stage";
-import { isReduced } from "../lib/motion";
+import { isReduced, onMotionChange } from "../lib/motion";
 
 export type KineticVariant = "slam" | "wipe" | "rise" | "scatter" | "type";
 
@@ -20,13 +20,15 @@ interface Props {
  */
 export function KineticText({ text, variant, className = "" }: Props) {
   const ref = useRef<HTMLSpanElement>(null);
+  const [reduced, setReduced] = useState(isReduced);
+  useEffect(() => onMotionChange(setReduced), []);
 
   useEffect(() => {
     const el = ref.current!;
     const chars = el.querySelectorAll<HTMLElement>(".kt-char");
     const masks = el.querySelectorAll<HTMLElement>(".kt-mask");
     const caret = el.querySelector<HTMLElement>(".kt-caret");
-    if (isReduced()) return;
+    if (reduced) return;
     const tl = gsap.timeline({ paused: true });
     const kick = () => { view.shake = Math.max(view.shake, 1); };
     switch (variant) {
@@ -69,13 +71,17 @@ export function KineticText({ text, variant, className = "" }: Props) {
       onEnter: () => tl.restart(),
       onLeaveBack: () => tl.pause(0),
     });
-    return () => { trigger.kill(); tl.kill(); };
-  }, [variant]);
+    return () => {
+      trigger.kill(); tl.kill();
+      gsap.set([el, ...chars], { clearProps: "transform,clipPath,opacity" });
+      if (caret) gsap.set(caret, { clearProps: "transform,opacity" });
+    };
+  }, [variant, text, reduced]);
 
   return (
-    <span ref={ref} className={`kt kt--${variant} ${className}`} aria-label={text} style={{ "--len": text.length } as CSSProperties}>
+    <span ref={ref} className={`kt kt--${variant} ${text.includes("\n") ? "kt--multiline" : ""} ${className}`} aria-label={text.replace(/\n/g, " ")} style={{ "--len": Math.max(...text.split("\n").map(line => line.length)) } as CSSProperties}>
       {[...text].map((ch, i) => (
-        <span key={i} className="kt-mask" aria-hidden="true">
+        ch === "\n" ? <span key={i} className="kt-break" aria-hidden="true" /> : <span key={i} className="kt-mask" aria-hidden="true">
           <span className="kt-char">{ch === " " ? " " : ch}</span>
         </span>
       ))}

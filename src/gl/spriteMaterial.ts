@@ -36,17 +36,33 @@ const fragment = /* glsl */ `
   uniform vec2 uHalf;
   uniform vec2 uSize;         // this layer's size on screen, world units
   uniform float uCA;          // chromatic aberration amount
+  uniform float uBlur;        // focus blur radius, world units
   varying vec2 vUv;
   varying vec2 vWorld;
+
+  vec4 focusSample(vec2 uv) {
+    if (uBlur < 0.001) return texture2D(map, uv);
+    vec2 stepUv = vec2(uBlur) / uSize;
+    vec4 sum = vec4(0.0);
+    // Blur premultiplied colour and alpha together to keep cut-out edges clean.
+    for (int y = -1; y <= 1; y++) {
+      for (int x = -1; x <= 1; x++) {
+        float weight = (x == 0 ? 2.0 : 1.0) * (y == 0 ? 2.0 : 1.0) / 16.0;
+        vec4 sampleColor = texture2D(map, uv + vec2(float(x), float(y)) * stepUv);
+        sum += vec4(sampleColor.rgb * sampleColor.a, sampleColor.a) * weight;
+      }
+    }
+    return vec4(sum.rgb / max(sum.a, 1e-3), sum.a);
+  }
 
   void main() {
     // Chromatic aberration: red and blue pulled apart along the line from the
     // screen's centre, growing toward the edges, as a lens does. uCA = 0 is exact.
     vec2 fromCentre = (vWorld - uCam) / uHalf;
     vec2 off = fromCentre * uCA * 7.0 / uSize;
-    vec4 tex = texture2D(map, vUv);
-    vec4 texR = texture2D(map, vUv - off);
-    vec4 texB = texture2D(map, vUv + off);
+    vec4 tex = focusSample(vUv);
+    vec4 texR = focusSample(vUv - off);
+    vec4 texB = focusSample(vUv + off);
     float a = max(tex.a, max(texR.a, texB.a));
     if (a < 0.002) discard;
     vec3 col = vec3(texR.r * texR.a, tex.g * tex.a, texB.b * texB.a) / max(a, 1e-3);
@@ -111,6 +127,7 @@ export const createSpriteMaterial = (texture: THREE.Texture, opts: { rim?: numbe
       uHalf: { value: new THREE.Vector2(1, 1) },
       uSize: { value: new THREE.Vector2(1, 1) },
       uCA: { value: 0 },
+      uBlur: { value: 0 },
     },
   });
 

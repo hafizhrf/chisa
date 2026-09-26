@@ -129,7 +129,12 @@ export function Milestone() {
                 </div>
               </div>
             </div>
-            <span className="milestone__scribble" lang="ja">{aside}</span>
+            <span className="milestone__scribble" lang="ja">
+              <svg viewBox="0 0 200 80" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M100 6 C132 6 157 10 174 19 L187 2 L184 29 C192 35 196 40 194 46 C187 65 143 75 100 75 C48 75 6 61 6 41 C6 21 48 6 100 6 Z" vectorEffect="non-scaling-stroke" />
+              </svg>
+              <span>{aside}</span>
+            </span>
           </div>
           <div className="milestone__note">
             <StrokeText key={reduced ? "still" : "motion"} as="h2" text={heading}
@@ -138,18 +143,18 @@ export function Milestone() {
             <p className="milestone__jp" lang="ja">{jp}</p>
             <p className="milestone__body">{body}</p>
             <div className="milestone__saving">
-              <span>Tabungan untuk artist</span>
+              <span>Artist commission fund</span>
               <p className="milestone__amount">{rupiah.format(saved)} <span>/ {rupiah.format(target)}</span></p>
-              <div className="milestone__progress" role="progressbar" aria-label="Tabungan untuk commission artist"
+              <div className="milestone__progress" role="progressbar" aria-label="Artist commission savings"
                 aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}
-                aria-valuetext={`${rupiah.format(saved)} dari ${rupiah.format(target)}, ${percent}%`}>
+                aria-valuetext={`${rupiah.format(saved)} of ${rupiah.format(target)}, ${percent}%`}>
                 <svg viewBox="0 0 500 20" preserveAspectRatio="none" aria-hidden="true">
                   <path className="milestone__track-line" pathLength="1" d="M4 11 Q110 5 247 10 T496 8" />
                   <path className="milestone__fill-line" pathLength="1" d="M4 11 Q110 5 247 10 T496 8"
                     style={{ strokeDasharray: `${progress} 1` }} />
                 </svg>
               </div>
-              <p className="milestone__status"><span>{percent}% terkumpul</span><span>Target Rp2 juta</span></p>
+              <p className="milestone__status"><span>{percent}% saved</span><span>Goal {rupiah.format(target)}</span></p>
             </div>
           </div>
         </div>

@@ -178,17 +178,21 @@ export function Contact() {
     });
     return () => trigger.kill();
   }, []);
-  // Keep the bloom registered to the room as the camera eases back.
+  // Track sky and foreground independently: their dolly depths differ.
   useEffect(() => {
     const glow = ref.current!.querySelector<HTMLElement>(".contact__bloom-glow")!;
+    const subject = ref.current!.querySelector<HTMLElement>(".contact__bloom-subject")!;
     const tick = () => {
       const bloom = glow.parentElement!;
       if (+getComputedStyle(bloom).opacity < 0.001) return;
-      const r = Stage.current?.screenRect("plate:scene");
-      if (!r) return;
-      glow.style.width = `${r.w}px`;
-      glow.style.height = `${r.h}px`;
-      glow.style.transform = `translate3d(${r.cx - r.w / 2}px, ${r.cy - r.h / 2}px, 0)`;
+      for (const [element, key] of [[glow, "plate:scene"], [subject, "contact-subject"]] as const) {
+        const r = Stage.current?.screenRect(key);
+        element.style.visibility = r ? "visible" : "hidden";
+        if (!r) continue;
+        element.style.width = `${r.w}px`;
+        element.style.height = `${r.h}px`;
+        element.style.transform = `translate3d(${r.cx - r.w / 2}px, ${r.cy - r.h / 2}px, 0) rotate(${r.rot}rad)`;
+      }
     };
     gsap.ticker.add(tick);
     return () => gsap.ticker.remove(tick);
@@ -206,8 +210,9 @@ export function Contact() {
         {/* The bloom as the room opens: its brightest light haloed and hazed, screened over it. */}
         <div className="contact__bloom" aria-hidden="true">
           <i className="contact__bloom-glow" />
-          <i className="contact__bloom-wash" />
+          <i className="contact__bloom-subject" />
         </div>
+        <div className="contact__shade" aria-hidden="true" />
         {/* The invitation lands in three staggered lines around the character. */}
         <h2 className={`contact-title ${play ? "is-in" : ""}`} aria-label="Let's make something together!">
           {["LET'S MAKE", "SOMETHING", "TOGETHER!"].map((line, l) => (
@@ -240,7 +245,6 @@ export function Contact() {
           </div>
           <footer className="contact__footer">
             <span>© {content.year} {content.name}</span>
-            <span>{content.credits}</span>
             <span>おわり</span>
           </footer>
         </div>
