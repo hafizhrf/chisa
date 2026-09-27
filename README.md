@@ -24,6 +24,12 @@ tools, socials and email. Brush-lettered titles can use A–Z, 0–9, `- — / .
 
 ## Art pipeline
 
+Experience sits between Profile and Works. Its five roles come from the SQL dump,
+ordered by start date in `content.experiences`. `npm run experience-assets` exports
+responsive hallway and hallway-bloom WebP images while retaining the source JPGs.
+Scroll moves through five shots; reduced motion and viewports below 700px tall
+show a normal readable list instead.
+
 The Milestone section sits between Skills and Contact. Edit `content.milestone` in
 `src/content.ts` to update the savings amount (IDR); the target defaults to Rp2,000,000.
 `npm run milestone-assets` builds its responsive establishing shot, transparent

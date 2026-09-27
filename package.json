@@ -10,7 +10,8 @@
     "test": "vitest run",
     "sprites": "node scripts/extract-sprites.mjs",
     "panels": "node scripts/cut-panels.mjs",
-    "milestone-assets": "node scripts/milestone-assets.mjs"
+    "milestone-assets": "node scripts/milestone-assets.mjs",
+    "experience-assets": "node scripts/experience-assets.mjs"
   },
   "dependencies": {
     "gsap": "^3.15.0",

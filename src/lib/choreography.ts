@@ -39,7 +39,7 @@ export const setupChoreography = ({ setActive, reduced }: { setActive: (index: n
       scrollTrigger: { trigger: "#opening", start: "top top", end: "bottom bottom", scrub: true },
     })
       .fromTo(view, { zoom: 1, lift: 0 }, { zoom: reduced ? 1 : 1.22, lift: reduced ? 0 : 1, duration: 1, ease: "power1.in", immediateRender: false }, 0)
-      .fromTo(view, { particles: 1 }, { particles: 0, duration: 0.65, ease: "power1.out", immediateRender: false }, 0)
+      .fromTo(view, { particles: 1, petalBlur: 0 }, { particles: 1, petalBlur: reduced ? 0 : 3, duration: 1, ease: "power1.in", immediateRender: false }, 0)
       .fromTo(".stage canvas", { filter: "blur(0px)" }, { filter: reduced ? "blur(0px)" : "blur(1.5px)", duration: 1, ease: "power1.in", immediateRender: false }, 0)
       // The lens fringe clears before the profile pin so the same DOM
       // character stays visually aligned as the room moves behind her.
@@ -84,6 +84,8 @@ export const setupChoreography = ({ setActive, reduced }: { setActive: (index: n
       .fromTo(view, { props: 1 }, { props: 0, duration: 0.06, immediateRender: false }, 0)
       // Dolly in on her; the curtains rush past and go.
       .fromTo(view, { zoom: reduced ? 1 : 1.22, focusX: 0, focusY: 0 }, { zoom: push, focusX: 0, focusY: reduced ? 0 : -30, duration: 0.35, ease: "power1.inOut", immediateRender: false }, 0)
+      .fromTo(view, { petalBlur: reduced ? 0 : 3 }, { petalBlur: reduced ? 0 : 7, duration: 0.35, ease: "power1.inOut", immediateRender: false }, 0)
+      .fromTo(view, { particles: 1 }, { particles: 0, duration: 0.11, ease: "power1.out", immediateRender: false }, 0.52)
       // Only the canvas room defocuses; the shared DOM character stays sharp.
       .fromTo(".stage canvas", { filter: reduced ? "blur(0px)" : "blur(1.5px)" },
         { filter: reduced ? "blur(0px)" : "blur(8px)", duration: 0.35, ease: "power1.inOut", immediateRender: false }, 0)

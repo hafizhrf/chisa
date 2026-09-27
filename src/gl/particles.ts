@@ -13,6 +13,7 @@ const vertex = /* glsl */ `
   uniform vec2 uCenter;
   uniform float uSize;
   uniform float uNearSize;
+  uniform float uZoom;
   uniform vec2 uLight;
   uniform float uLightRadius;
   varying vec2 vUv;
@@ -30,6 +31,7 @@ const vertex = /* glsl */ `
     float py = fract(aSeed.y + t * 0.05);
     vec2 pos = uCenter + (vec2(px, 1.0 - py) - 0.5) * span;
     pos.x += sin(t * 1.3 + aSeed.w * 6.28) * uView.x * 0.02;
+    pos = uCenter + (pos - uCenter) * uZoom;
     float angle = t * (1.2 + aSeed.w * 2.0) + aSeed.w * 6.28;
     // Flutter: the flake turns about its long axis, so it thins and flips.
     float flip = cos(t * (2.0 + aSeed.w * 3.0) + aSeed.x * 6.28);
@@ -49,12 +51,22 @@ const fragment = /* glsl */ `
   uniform sampler2D map;
   uniform float uOpacity;
   uniform float uLight1;
+  uniform float uBlur;
   varying vec2 vUv;
   varying vec3 vColor;
   varying float vLit;
   varying float vFlip;
   void main() {
     float a = texture2D(map, vUv).a;
+    if (uBlur > 0.001) {
+      a = 0.0;
+      for (int y = -1; y <= 1; y++) {
+        for (int x = -1; x <= 1; x++) {
+          float weight = (x == 0 ? 2.0 : 1.0) * (y == 0 ? 2.0 : 1.0) / 16.0;
+          a += texture2D(map, clamp(vUv + vec2(float(x), float(y)) * uBlur, 0.0, 1.0)).a * weight;
+        }
+      }
+    }
     if (a < 0.01) discard;
     vec3 col = vColor * (vFlip < 0.0 ? 0.88 : 1.0);
     col += vec3(1.0, 0.95, 0.85) * vLit * uLight1 * 0.6;
@@ -116,6 +128,8 @@ export const createParticles = (count: number) => {
       uCenter: { value: new THREE.Vector2() },
       uSize: { value: 28 },
       uNearSize: { value: 0 },
+      uZoom: { value: 1 },
+      uBlur: { value: 0 },
       uOpacity: { value: 1 },
       uLight: { value: new THREE.Vector2() },
       uLightRadius: { value: 500 },

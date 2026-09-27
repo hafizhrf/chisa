@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { FrontCutouts } from "./components/FrontCutouts";
 import { CharacterCutout } from "./components/CharacterCutout";
 import { Hud } from "./components/Hud";
+import { ExperienceSection } from "./sections/Experience";
 import { Intro } from "./components/Intro";
 import { LightLeak } from "./components/LightLeak";
 import { OpticalFx } from "./components/OpticalFx";
@@ -110,6 +111,7 @@ export default function App() {
       <main className="page">
         <Hero revealed={revealed} />
         <About />
+        <ExperienceSection />
         <Works onOpen={setWork} />
         <Skills />
         <Milestone />

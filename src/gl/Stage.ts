@@ -53,6 +53,7 @@ export const view = {
   /** Additional close-up that settles before the Contact bloom. */
   contactPush: 1,
   particles: 1,
+  petalBlur: 0,
   /** Handheld camera amount (drift and micro-shake). */
   handheld: 1,
   /** Parallax amount. */
@@ -464,6 +465,7 @@ class GLBackend implements Backend {
     });
 
     const mobilePetals = window.innerWidth < 768;
+    const petalZoom = view.contactShot > 0.5 ? 1 : view.zoom * view.settle;
     // Petals belong to the room; they never drift over the white pages.
     const petals = view.particles * (frame.items.find((i) => i.key === "plate:scene")?.opacity ?? 0);
     const plateOrder = frame.items.findIndex((i) => i.key === "plate:scene");
@@ -473,9 +475,12 @@ class GLBackend implements Backend {
       // cross the character, with larger silhouettes and a faster draft.
       mesh.renderOrder = back ? plateOrder + 0.5 : 1000;
       pm.uniforms.uTime.value = frame.time * (back ? 0.65 : 1);
+      const depthZoom = 1 + (petalZoom - 1) * (back ? 0.55 : 1.05);
+      pm.uniforms.uZoom.value = depthZoom;
       pm.uniforms.uView.value.set(half.w * 2, half.h * 2);
       pm.uniforms.uCenter.value.set(cam.x - pointer.x * (back ? 5 : 28), cam.y + pointer.y * (back ? 3 : 18));
-      pm.uniforms.uSize.value = Math.min(half.w, half.h) * (mobilePetals ? 0.065 : 0.035) * (back ? 0.6 : 1);
+      pm.uniforms.uSize.value = Math.min(half.w, half.h) * (mobilePetals ? 0.065 : 0.035) * (back ? 0.6 : 1) * depthZoom;
+      pm.uniforms.uBlur.value = view.contactShot > 0.5 ? 0 : view.petalBlur / Math.max(8, pm.uniforms.uSize.value * window.innerWidth / (half.w * 2));
       pm.uniforms.uNearSize.value = !back && mobilePetals ? 0.7 : 0;
       pm.uniforms.uLight.value.set(light.x, light.y);
       pm.uniforms.uLightRadius.value = light.radius;
@@ -486,10 +491,12 @@ class GLBackend implements Backend {
 
     this.renderer.render(this.scene, this.camera);
     const opening = document.getElementById("opening")?.getBoundingClientRect();
+    const profile = document.getElementById("profile")?.getBoundingClientRect();
     const contact = document.querySelector(".contact__stage")?.getBoundingClientRect();
     const inOpening = view.contactShot < 0.5 && opening && opening.bottom > 0 && opening.top < window.innerHeight;
     const inContact = view.contactShot > 0.5 && contact && contact.bottom > 0 && contact.top <= 0;
-    this.frontPetals.visible = !frame.reduced && petals > 0.001 && !!(inOpening || inContact);
+    const inProfile = view.contactShot < 0.5 && profile && profile.bottom > 0 && profile.top <= 0;
+    this.frontPetals.visible = !frame.reduced && petals > 0.001 && !!(inOpening || inProfile || inContact);
     this.petalRenderer.render(this.petalScene, this.camera);
   }
 
