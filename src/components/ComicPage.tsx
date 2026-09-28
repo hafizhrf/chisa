@@ -12,7 +12,16 @@ import { WorkCard } from "./WorkCard";
 const useAspect = () => {
   const [aspect, setAspect] = useState(() => window.innerWidth / window.innerHeight);
   useEffect(() => {
-    const onResize = () => setAspect(window.innerWidth / window.innerHeight);
+    // A phone's address bar showing or hiding only nudges the height. Re-deriving
+    // the page then would resize this section mid-scroll and shift everything
+    // below it, so, like ScrollTrigger, only a real resize counts.
+    let w = window.innerWidth, h = window.innerHeight;
+    const onResize = () => {
+      if (window.innerWidth === w && Math.abs(window.innerHeight - h) < h * 0.25) return;
+      w = window.innerWidth;
+      h = window.innerHeight;
+      setAspect(w / h);
+    };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);

@@ -32,11 +32,27 @@ export function KineticText({ text, variant, className = "" }: Props) {
     const tl = gsap.timeline({ paused: true });
     const kick = () => { view.shake = Math.max(view.shake, 1); };
     switch (variant) {
-      case "slam":
-        tl.fromTo(chars, { scale: 2.4, opacity: 0, yPercent: -30, rotate: () => gsap.utils.random(-14, 14) },
-          { scale: 1, opacity: 1, yPercent: 0, rotate: 0, duration: 0.5, ease: "expo.out", stagger: 0.045 })
-          .add(kick, 0.12);
+      case "slam": {
+        // The MV's chorus slam, measured at 24 fps: each character lands at
+        // about 2.6x and is at size two or three frames later; 0.1s between
+        // characters, tightened for long words so the whole slam stays near
+        // a second. The last impact fires a ring burst.
+        const each = Math.min(0.1, 1.2 / chars.length);
+        const last = (chars.length - 1) * each + 0.1;
+        tl.fromTo(chars, { scale: 2.6, opacity: 0, rotate: () => gsap.utils.random(-8, 8) },
+          { scale: 1, opacity: 1, rotate: 0, duration: 0.1, ease: "power4.out", stagger: each })
+          .add(kick, 0.1);
+        const ring = el.querySelector<HTMLElement>(".kt-ring");
+        if (ring) {
+          const target = masks[masks.length - 1];
+          tl.set(ring, { left: target.offsetLeft + target.offsetWidth / 2, top: target.offsetTop + target.offsetHeight / 2 }, last)
+            .fromTo(ring, { scale: 0.35, opacity: 1, "--ring-w": "0.09em" },
+              { scale: 1.7, opacity: 0, "--ring-w": "0.01em", duration: 0.45, ease: "power2.out", immediateRender: false }, last)
+            .fromTo(ring.children, { scale: 0.2, opacity: 1, x: 0, y: 0 },
+              { scale: 1, opacity: 0, x: (i: number) => (i ? -1 : 1) * 70, y: (i: number) => (i ? 40 : -50), duration: 0.45, ease: "power2.out", immediateRender: false }, last);
+        }
         break;
+      }
       case "wipe":
         tl.fromTo(el, { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.7, ease: "power3.inOut" })
           .fromTo(chars, { xPercent: -40, skewX: -20 }, { xPercent: 0, skewX: 0, duration: 0.8, ease: "expo.out", stagger: 0.02 }, 0.05)
@@ -75,6 +91,8 @@ export function KineticText({ text, variant, className = "" }: Props) {
       trigger.kill(); tl.kill();
       gsap.set([el, ...chars], { clearProps: "transform,clipPath,opacity" });
       if (caret) gsap.set(caret, { clearProps: "transform,opacity" });
+      const ring = el.querySelector<HTMLElement>(".kt-ring");
+      if (ring) gsap.set([ring, ...ring.children], { clearProps: "all" });
     };
   }, [variant, text, reduced]);
 
@@ -86,6 +104,7 @@ export function KineticText({ text, variant, className = "" }: Props) {
         </span>
       ))}
       {variant === "type" && <span className="kt-caret" aria-hidden="true" />}
+      {variant === "slam" && <span className="kt-ring" aria-hidden="true"><i /><i /></span>}
     </span>
   );
 }

@@ -63,6 +63,8 @@ export interface Experience {
   start_date: string;
   end_date: string | null;
   description: string;
+  /** The yellow brush word over the hallway (A–Z, 0–9); defaults to the org's first word. */
+  keyword?: string;
 }
 
 export const content = {
@@ -70,7 +72,7 @@ export const content = {
     { id: 4, role: "Frontend Engineer", org: "8villages", start_date: "2019-09", end_date: "2021-04", description: "Engineered an agricultural management application that combines automation tools and survey features. Successfully integrated the platform into Telkomsel's SME website project." },
     { id: 1, role: "Software Engineer", org: "mbiz.co.id", start_date: "2021-04", end_date: null, description: "I build and maintain cross-platform products with React, PHP, and Flutter. I also design and implement internal AI-agentic coding workflows, leveraging RAG, grounding, and automation to streamline development." },
     { id: 3, role: "Software Engineer", org: "trulav.id", start_date: "2024-03", end_date: "2025-08", description: "Developed the complete mobile and web applications for Trulav.id, a dedicated platform empowering women in life, career, and personal happiness." },
-    { id: 2, role: "IT Contract", org: "Kementerian dalam negeri", start_date: "2024-08", end_date: "2025-01", description: "Led the revamp of the Ministry of Home Affairs' (Kementerian Dalam Negeri) web platform. Optimized big data database structures and management systems, and seamlessly integrated geospatial data." },
+    { id: 2, role: "IT Contract", org: "Kementerian dalam negeri", keyword: "KEMENDAGRI", start_date: "2024-08", end_date: "2025-01", description: "Led the revamp of the Ministry of Home Affairs' (Kementerian Dalam Negeri) web platform. Optimized big data database structures and management systems, and seamlessly integrated geospatial data." },
     { id: 5, role: "Freelance Developer", org: "kyou.id", start_date: "2025-11", end_date: null, description: "Maintaining the full-stack architecture of Kyou.id, an enterprise B2B and consumer entertainment commerce ecosystem for licensed hobby goods." },
   ] satisfies Experience[],
   name: "Kuroneko",

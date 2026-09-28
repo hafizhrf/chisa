@@ -20,6 +20,11 @@
   /* Brush lettering blue, from the lyric cards the titles imitate. */
   --ink: #3f9be8;
   --rose: #ee7aa8;
+  /* The MV's two accents, sampled from its frames: cobalt for every piece of
+     UI (pills, logs, small lyrics), and highlighter yellow kept for the one
+     keyword on screen. Yellow is only for type set over a picture. */
+  --ui: #1c7af8;
+  --key: #f0f810;
   /* The white everything opens from and closes into. */
   --paper: #ffffff;
   --line: rgba(67, 51, 99, 0.16);
@@ -67,7 +72,7 @@ a { color: inherit; }
 .milestone { position: relative; background: var(--paper); }
 .milestone__sticky { position: relative; overflow: clip; isolation: isolate; background: var(--paper); }
 .milestone--animated { height: 250svh; }
-.milestone--animated .milestone__sticky { position: sticky; top: 0; height: 100svh; }
+.milestone--animated .milestone__sticky { position: sticky; top: 0; height: 100dvh; }
 .milestone__shot { position: absolute; inset: 0; visibility: hidden; }
 .milestone__shot img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 42%; }
 .milestone__wipe { position: absolute; inset: 0; z-index: 2; background: var(--paper); visibility: hidden; pointer-events: none; }
@@ -253,20 +258,38 @@ a { color: inherit; }
 .experience__entries { max-width: 680px; margin: auto; }
 .experience__entry { padding: 28px 0; border-bottom: 1px solid var(--line); }
 .experience__entry:last-child { border-bottom: 0; }
-.experience__period { margin: 0 0 12px; font-size: 14px; color: var(--indigo); }
+/* Lyric pills: white, dashed cobalt edge, heavy and light weights in one phrase. */
+.experience__pill { display: flex; width: fit-content; max-width: 100%; margin: 0; padding: 0.4em 1.05em; background: #fff; border: 1px dashed color-mix(in srgb, var(--ui) 55%, transparent); border-radius: 999px; box-shadow: 0 3px 10px rgba(28, 122, 248, 0.1); color: var(--ui); line-height: 1.35; }
+.experience__period { margin: 0 0 14px; font-size: 14px; font-weight: 400; }
+.experience__period b { font-weight: 800; }
 .experience__entry h3 { margin: 0; font-family: var(--font-display); font-size: clamp(1.7rem, 3vw, 2.4rem); line-height: 1.2; overflow-wrap: anywhere; }
-.experience__role { margin: 12px 0 20px; color: var(--ink); font-size: 1rem; }
+.experience__role { margin: 14px 0 20px 1.6em; font-size: 1rem; font-weight: 700; }
 .experience__description { margin: 0; font-size: clamp(14px, 1.2vw, 18px); line-height: 1.65; max-width: 48ch; }
 .experience__sequence { margin: 24px 0 0; color: var(--ink); font-size: 13px; }
+.experience__log, .experience__keyword { display: none; }
 .experience__wipe { display: none; }
-.experience--animated { height: 420svh; margin-top: -100dvh; background: transparent; pointer-events: none; }
-.experience--animated .experience__stage { position: sticky; top: 0; height: 100svh; background: var(--paper); pointer-events: auto; }
+.experience--animated { height: 420svh; margin-top: -100svh; background: transparent; pointer-events: none; }
+.experience--animated .experience__stage { position: sticky; top: 0; height: 100dvh; background: var(--paper); pointer-events: auto; }
 .experience--animated .experience__visual { position: absolute; inset: 0; height: auto; }
 .experience--animated .experience__paper { position: absolute; right: 0; top: 0; bottom: 0; width: clamp(360px, 35vw, 500px); padding: 90px 36px 36px 64px; display: flex; flex-direction: column; justify-content: center; }
 .experience--animated .experience__paper::before { content: ""; position: absolute; inset: 0 auto 0 -90px; width: 91px; background: var(--paper); clip-path: polygon(100% 0, 100% 100%, 0 100%); }
 .experience--animated .experience__paper h2 { margin-bottom: 28px; }
-.experience--animated .experience__entries { position: relative; width: 100%; height: 430px; margin: 0; }
-.experience--animated .experience__entry { position: absolute; inset: 0; padding: 0; border: 0; }
+.experience--animated .experience__paper { padding-top: 72px; }
+.experience--animated .experience__entries { display: grid; width: 100%; margin: 0; }
+.experience--animated .experience__entry { grid-area: 1 / 1; padding: 0; border: 0; }
+.experience--animated .experience__sequence { display: none; }
+/* Every role reached so far stays written on its rule, like the MV's lyric log. */
+.experience--animated .experience__log { display: block; margin: 26px 0 0; padding: 0; list-style: none; font-size: 12px; color: var(--ui); }
+.experience__log li { height: 20px; padding-left: 2px; border-bottom: 1px dashed color-mix(in srgb, var(--ui) 30%, transparent); line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.experience__log li { color: transparent; }
+.experience__log li.is-on { color: color-mix(in srgb, var(--ui) 55%, transparent); }
+.experience__log li.is-current { color: var(--ui); font-weight: 700; }
+.experience__log span { margin-right: 10px; font-weight: 700; }
+.experience--animated .experience__keyword { display: block; position: absolute; left: clamp(20px, 5vw, 72px); bottom: 11svh; z-index: 1; width: min(54vw, 720px); pointer-events: none; }
+@media (max-height: 799px) {
+  .experience--animated .experience__log { display: none; }
+  .experience--animated .experience__sequence { display: block; }
+}
 .experience--animated .experience__wipe { display: block; position: absolute; inset: 0; z-index: 3; background: var(--paper); pointer-events: none; }
 @media (max-width: 700px) {
   .experience--animated .experience__visual { bottom: auto; height: calc(100% - var(--experience-paper-height, 390px)); }
@@ -274,6 +297,9 @@ a { color: inherit; }
   .experience--animated .experience__paper { top: auto; width: 100%; padding: 26px var(--gutter) 30px; justify-content: center; }
   .experience--animated .experience__paper::before { inset: -16px 0 auto; width: 100%; height: 17px; clip-path: polygon(0 100%, 100% 0, 100% 100%); }
   .experience--animated .experience__paper h2 { margin-bottom: 18px; font-size: 1rem; }
+  .experience--animated .experience__log { display: none; }
+  .experience--animated .experience__sequence { display: block; }
+  .experience--animated .experience__keyword { left: var(--gutter); bottom: calc(var(--experience-paper-height, 390px) + 28px); width: calc(100% - 2 * var(--gutter)); }
   .experience--animated .experience__entries { display: grid; height: auto; flex: none; }
   .experience--animated .experience__entry { position: relative; inset: auto; grid-area: 1 / 1; }
   .experience__entry h3 { font-size: 28px; }
@@ -317,7 +343,11 @@ a { color: inherit; }
 @media (max-width: 820px) { .hud__nav { display: none; } }
 
 /* ── Hero ────────────────────────────────────────────────────────────── */
-.hero { position: relative; height: 170dvh; }
+/* Scroll lengths and section overlaps use svh, never dvh: a phone's address
+   bar showing or hiding changes dvh mid-scroll, which moves every section below
+   under ScrollTrigger positions it doesn't recalculate (it ignores those resizes
+   on touch screens). Sticky stages stay 100dvh so they always fill the screen. */
+.hero { position: relative; height: 170svh; }
 /* The opening is pinned while its scroll plays as motion (choreography.ts). */
 .hero__sticky {
   position: sticky;
@@ -377,10 +407,10 @@ a { color: inherit; }
 /* ── Profile: one pinned shot ────────────────────────────────────────── */
 .about {
   position: relative;
-  height: 380dvh;
+  height: 380svh;
   /* Starts under the opening's last screen, so its pin takes over on the very
      frame the opening's lets go: no stretch of still picture in between. */
-  margin-top: -100dvh;
+  margin-top: -100svh;
 }
 .about__sticky { position: sticky; top: 0; height: 100dvh; overflow: clip; }
 .about__flat {
@@ -465,7 +495,7 @@ a { color: inherit; }
   position: relative;
   /* Begins under the profile's last screen, so its pin takes over the moment
      the profile's lets go (the comic starts white, as the profile ends). */
-  margin-top: -100dvh;
+  margin-top: -100svh;
 }
 .works__sticky { position: sticky; top: 0; height: 100dvh; overflow: hidden; }
 .comic { position: absolute; inset: 0; background: #fff; }
@@ -734,7 +764,10 @@ html.reduce-motion .modal::backdrop { transition: none; }
 .kt-mask { display: inline-block; }
 .kt--rise .kt-mask { overflow: hidden; padding-bottom: 0.06em; }
 .kt-char { display: inline-block; will-change: transform; }
-.kt--type { position: relative; }
+.kt--type, .kt--slam { position: relative; }
+/* Impact ring after a slam: one ring and two satellites, cobalt on the page. */
+.kt-ring { position: absolute; left: 0; top: 0; width: 1.1em; height: 1.1em; margin: -0.55em 0 0 -0.55em; border: var(--ring-w, 0.05em) solid var(--ui); border-radius: 50%; opacity: 0; pointer-events: none; }
+.kt-ring > i { position: absolute; left: 50%; top: 50%; width: 0.32em; height: 0.32em; margin: -0.16em; border: 0.03em solid var(--ui); border-radius: 50%; }
 .kt-caret { position: absolute; left: 0; top: 0.08em; width: 0.035em; height: 0.78em; background: var(--ink); opacity: 0; pointer-events: none; }
 html:not(.reduce-motion) .kt--type .kt-char { opacity: 0; }
 html.reduce-motion .kt--type .kt-char { opacity: 1; }
@@ -748,8 +781,10 @@ html.reduce-motion .kt--type .kt-char { opacity: 1; }
 /* ── Contact / Outro ─────────────────────────────────────────────────── */
 .contact { position: relative; }
 /* Pinned over the dusk classroom while the sheet below scrolls up over it. */
-.contact__stage { position: sticky; top: 0; height: 100dvh; display: grid; align-content: start; padding: clamp(80px, 14vh, 150px) var(--gutter) 0; }
-.contact__hold { height: 90dvh; }
+/* Fills the screen (dvh) but always takes 100svh of flow, so the address bar
+   can't move the hold and sheet below it under their triggers. */
+.contact__stage { position: sticky; top: 0; height: 100dvh; margin-bottom: calc(100svh - 100dvh); display: grid; align-content: start; padding: clamp(80px, 14vh, 150px) var(--gutter) 0; }
+.contact__hold { height: 90svh; }
 .contact__stage .fluid { z-index: 0; }
 .contact__flare { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
 .contact__flare > i { position: absolute; visibility: hidden; opacity: 0; }
@@ -797,7 +832,7 @@ html.reduce-motion .kt--type .kt-char { opacity: 1; }
   .contact__bloom-subject { opacity: 1; }
   .contact__bloom-wash { background: radial-gradient(85% 48% at 50% 62%, rgba(255, 250, 244, 0.5), rgba(255, 236, 240, 0.12) 55%, transparent 85%); }
 }
-.contact__sheet { position: relative; z-index: 1; margin-top: -8dvh; background: var(--paper); }
+.contact__sheet { position: relative; z-index: 1; margin-top: -8svh; background: var(--paper); }
 .contact__wave { position: absolute; left: 0; bottom: calc(100% - 1px); width: 100%; height: 48px; fill: var(--paper); transform: scaleY(-1); }
 .contact__inner { max-width: 1080px; margin-inline: auto; padding: clamp(20px, 4vw, 40px) var(--gutter) 40px; }
 .contact__inner > .section-title { text-align: center; }

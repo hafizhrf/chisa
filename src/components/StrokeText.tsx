@@ -29,11 +29,18 @@ interface Props {
   /** A faint red/cyan fringe either side of the ink, like print slightly off register. */
   fringe?: boolean;
   onDone?: () => void;
+  /**
+   * Take the lettering back off, strokes retracting in reverse writing order
+   * (the MV's un-write before the next keyword), in about half a second.
+   */
+  erase?: boolean;
+  onErased?: () => void;
   as?: "h1" | "h2" | "h3" | "p" | "span";
 }
 
 const SLANT = 12; // degrees
 const PAD = 16;
+const ERASE = 0.5; // seconds for a whole word to un-write
 
 /**
  * Brush lettering that paints itself in, stroke by stroke, the way lyric
@@ -80,6 +87,8 @@ export function StrokeText({
   pace = 0.8,
   className = "",
   onDone,
+  erase = false,
+  onErased,
   outline,
   fringe = false,
   as: Tag = "span",
@@ -92,6 +101,9 @@ export function StrokeText({
   // Held in a ref so a new callback each render doesn't restart the painting.
   const doneRef = useRef(onDone);
   doneRef.current = onDone;
+  const erasedRef = useRef(onErased);
+  erasedRef.current = onErased;
+  const paintRef = useRef<gsap.core.Timeline | null>(null);
   const lines = text.split("\n").length;
   const lean = Math.tan((SLANT * Math.PI) / 180) * layout.height;
   const width = layout.width + lean + PAD * 2;
@@ -113,6 +125,7 @@ export function StrokeText({
       return;
     }
     const timeline = gsap.timeline({ delay, onComplete: () => { done.current = true; doneRef.current?.(); } });
+    paintRef.current = timeline;
     let at = 0;
     let lastChar = -1;
     layout.strokes.forEach((stroke, index) => {
@@ -132,6 +145,31 @@ export function StrokeText({
     timeline.fromTo(svg, { x: -10, scale: 1.015 }, { x: 0, scale: 1, duration: at + 0.4, ease: "expo.out" }, 0);
     return () => { timeline.kill(); };
   }, [play, layout, delay, speed, pace, weight, outline]);
+
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg || !erase) return;
+    paintRef.current?.kill();
+    done.current = true;
+    const all = Array.from(svg.querySelectorAll<SVGPathElement>(".st-ink"));
+    const shadows = Array.from(svg.querySelectorAll<SVGPathElement>(".st-shadow"));
+    const n = layout.strokes.length;
+    if (isReduced() || n === 0) {
+      gsap.set([...all, ...shadows], { opacity: 0 });
+      erasedRef.current?.();
+      return;
+    }
+    // Last stroke first, each pulled back toward where the brush started it;
+    // quicker than the writing, so the word clears before the next one lands.
+    const each = Math.min(0.16, (ERASE * 2) / (n + 1));
+    const gap = n > 1 ? (ERASE - each) / (n - 1) : 0;
+    const timeline = gsap.timeline({ onComplete: () => { gsap.set([...all, ...shadows], { opacity: 0 }); erasedRef.current?.(); } });
+    for (let index = n - 1; index >= 0; index--) {
+      const copies = [...all.filter((_, j) => j % n === index), shadows[index]];
+      timeline.to(copies, { strokeDashoffset: 1, duration: each, ease: "power2.in" }, (n - 1 - index) * gap);
+    }
+    return () => { timeline.kill(); };
+  }, [erase, layout]);
 
   // Strokes grouped per character, so a letter can be moved as one piece.
   const chars = [...new Set(layout.strokes.map((s) => s.char))];
